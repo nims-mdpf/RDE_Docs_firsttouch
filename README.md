@@ -30,6 +30,11 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 5. RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書
     - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
 
+## 関連リンク
+- [RDEToolKit](https://github.com/nims-mdpf/rdetoolkit)
+- [RDE/データセットテンプレート生成、確認ツール](https://github.com/nims-mdpf/RDE_datasettemplate-schemafile-make-tool)
+- [RDE構造化処理結果プレビューツール](https://github.com/nims-mdpf/RDE_structured-result-preview-tool)
+
 ## 利用ルールおよびライセンス
  
 * 本プログラムはMITライセンスで提供されています。
