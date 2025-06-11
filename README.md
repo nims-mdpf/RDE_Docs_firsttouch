@@ -30,6 +30,33 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 5. RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書
     - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
 
+## オススメの読み方
+
+1. まずはデータセットテンプレートとその開発について一読を
+    - RDEデータセットテンプレート開発における用語や概略をまずは確認<br>
+    [doc1/RDEデータセットテンプレートの開発を始める前に.pdf](doc1/RDEデータセットテンプレートの開発を始める前に.pdf)
+    - でも、その前にRDEサービスについてこちらで確認しておいてください。[DICEサービスRDE紹介ページ](https://dice.nims.go.jp/services/RDE/)
+2. とにかくハンズオン
+    - 習うより慣れろ、ということでとにかく動かしてみましょう
+    - [doc3/RDEToolKit(invoiceモード)を利用したシンプルなRDEデータ構造化処理プログラムハンズオン.pdf](doc3/RDEToolKit%28invoiceモード%29を利用したシンプルなRDEデータ構造化処理プログラムハンズオン.pdf)
+    - 参考プログラムなどは[こちら](doc3)から取得してください
+3. もっと知りたい、参考プログラムを改造したくなったら
+    - テンプレートを改造してみたい、どういうしくみか知りたくなったらこちら<br>
+    [doc2/RDEデータ構造化とデータセットテンプレート解説.pdf](doc2/RDEデータ構造化とデータセットテンプレート解説.pdf)
+4. 他に参考プログラムないの？
+    - 4つの登録事例のサンプルプログラムを試してみてください
+    - [doc4/RDEToolKitの各登録モードの利用事例.pdf](doc4/RDEToolKitの各登録モードの利用事例.pdf)
+    - プログラムコードは[こちら](doc4)
+5. 実際に使えるデータセットテンプレートはないの？
+    - こちらを参考にしてください
+      - [RDE_XRD](https://github.com/nims-mdpf/RDE_XRD)
+      - [RDE_XPS](https://github.com/nims-mdpf/RDE_XPS)
+      - [RDE_SIMPLE_REGISTRATION](https://github.com/nims-mdpf/RDE_SIMPLE_REGISTRATION)
+    - 順次追加していきますので[NIMS-MDPF github](https://github.com/nims-mdpf/)をご確認ください
+6. Dockerコンテナを使って開発をしたいという方はこちら
+    - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
+
+
 ## 関連リンク
 - [RDEToolKit](https://github.com/nims-mdpf/rdetoolkit)
 - [RDEToolKit in PyPi](https://pypi.org/project/rdetoolkit/)
@@ -50,4 +77,4 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 お問い合わせ フォーム<br>
 https://dice.nims.go.jp/contact/form.html
 
-2025.5.29 公開
+2025.6.12 更新
