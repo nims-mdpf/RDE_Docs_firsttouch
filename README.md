@@ -6,29 +6,37 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 
 ここで提供する資料は、RDEにおけるデータセットテンプレート開発をするための解説とハンズオン資料です。
 
+英語版を用意していないため、各資料のmarkdown形式のファイルを掲載しています。翻訳をしてご利用ください。
+
 ## 提供する資料について
 
 1. RDEデータ構造化処理開発のための予備知識
     - RDEのデータセットテンプレート開発を始めるための予備知識の説明書です。
     - [doc1/RDEデータセットテンプレートの開発を始める前に.pdf](doc1/RDEデータセットテンプレートの開発を始める前に.pdf)
+    - [markdown形式ドキュメント](doc1/documents/)
 2. RDEデータ構造化とデータセットテンプレート解説
     -   RDEデータセットテンプレートとデータ構造化に関する詳細な説明資料です。
     -   ハンズオンで実践において不明な用語や、テンプレート開発で仕様の確認をしたいときにご利用ください。
     -   [doc2/RDEデータ構造化とデータセットテンプレート解説.pdf](doc2/RDEデータ構造化とデータセットテンプレート解説.pdf)
     -   [doc2/rde-datasettemplate-instructions_appendix.zip](doc2/rde-datasettemplate-instructions_appendix.zip)
+    -   [markdown形式ドキュメント](doc2/documents/)
 3. RDEToolKitを使ったRDE構造化処理ハンズオンチュートリアル
     - データセットテンプレートのサンプルを動かしてみるハンズオン資料です。
     - まず手を動かしてみてください。
     - そして、用語のことや仕組みをもっと知りたくなったらRDEデータ構造化とデータセットテンプレート解説を確認してみてください。
     - [doc3/RDEToolKit(invoiceモード)を利用したシンプルなRDEデータ構造化処理プログラムハンズオン.pdf](doc3/RDEToolKit%28invoiceモード%29を利用したシンプルなRDEデータ構造化処理プログラムハンズオン.pdf)
+    - [markdown形式ドキュメント](doc3/documents/)
     - [doc3/handson_codes.zip](doc3/handson_codes.zip)
     - [doc3/samples.zip](doc3/samples.zip)
 4. RDEToolKitの各登録モードの利用事例ハンズオン
     - RDEToolKitには予め用意された登録モードが数種類あります。各モードを動かしてみるためのハンズオン資料です。
     - [doc4/RDEToolKitの各登録モードの利用事例.pdf](doc4/RDEToolKitの各登録モードの利用事例.pdf)
+    - [markdown形式ドキュメント](doc4/documents/)
     - [doc4/sample_data.zip](doc4/sample_data.zip)
 5. RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書
     - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
+    - [markdown形式ドキュメント](doc5/documents/)
+
 
 ## オススメの読み方
 
