@@ -12,13 +12,13 @@ RDEでは[開発者向けの資料やツール](#)を複数用意しています
 |（構造化処理用 Docker Image）|構造化コンテナイメージ<br>`python`で記述された構造化処理をDockerコンテナ化したもの|
 |invoice.schema.json|送り状入力画面の設定ファイル<br>送り状画面の入力項目を、表示名、表示順、必須項目などを含め指定できます。手入力項目を定義するときに利用します。|
 |metadata-def.json|抽出するメタデータの定義ファイル。構造化処理で抽出したメタデータの定義。|
-|catalog.schema.json|データカタログ定義ファイル|
-|batch.yaml|データ構造化定義ファイル|
-|jobs.template.yaml|データ構造化ジョブ定義ファイル|
-|jobs-divided.template.yaml|分割後の個々のデータに適用するデータ構造化ジョブ定義ファイル|
+|catalog.schema.json|データカタログ定義ファイル。データセットのデータカタログの登録項目を定義。|
+|batch.yaml|データ構造化定義ファイル。構造化処理を実行するpoolの指定などを行う。システム側で作成。|
+|jobs.template.yaml|データ構造化ジョブ定義ファイル。利用するコンテナの指定、実行するプログラムの指定をする。|
+|jobs-divided.template.yaml|分割後の個々のデータに適用するデータ構造化ジョブ定義ファイル。jobs.template.yamlと役割は同じ。現在は利用していない。|
 |tasksupport/*|タスク補助ファイル<br>tasksupportディレクトリに格納された、構造化コンテナイメージが実行時に使用するファイル群|
 
-上記のうち、データセットテンプレート開発者が用意するものは、invoice.schema.json、metadata-def.json、catalog.schema.json、tasksupportファイル、構造化処理プログラムです。その他の定義ファイルやDockerコンテナイメージは、データセットテンプレート登録担当者が用意します。ただし、既存のテンプレートを流用する場合は一部の定義ファイルのみであったり、またはコンテナイメージの作成をお願いすることもあります。
+上記のうち、データセットテンプレート開発者が用意するものは、invoice.schema.json、metadata-def.json、catalog.schema.json、tasksupportファイル、構造化処理プログラムです。ただし、catalog.schema.jsonは構造化処理において利用されず、データセット開設後にデータカタログを作成する際に利用されます。catalog.schema.jsonは特に要望がない場合は標準のものを利用します。その他の定義ファイルやDockerコンテナイメージは、データセットテンプレート登録担当者が用意します。ただし、既存のテンプレートを流用する場合は一部の定義ファイルのみであったり、またはコンテナイメージの作成をお願いすることもあります。
 
 Figure5 は、データセットとデータセットテンプレートのイメージ図です。
 <center><img src="images/dataset-template.png" width="500"></center>
@@ -77,6 +77,7 @@ Figure6 は、データセットと各種ストレージの構成図です。<br
 │   ├── thumbnail        サムネイル画像
 │   ├── main_image       メイン画像
 │   ├── other_image      メイン画像以外の画像ファイル
+│   ├── structured       数値データのcsvや解析結果などのファイル
 │   ├── attachment       添付ファイルとして入力されたファイル
 │   ├── nonshared_raw    非共有データ
 │   └── raw              共有データ
@@ -96,6 +97,15 @@ Figure6 は、データセットと各種ストレージの構成図です。<br
 
 <center><img src="images/job-directory_rde-veiwer.png" width="600"></center>
 <center>Figure8 ジョブディレクトリとRDEアプリケーションでの表示</center>
+
+
+## データカタログ(catalog.schema.jsonの適用先)
+
+catalog.schema.jsonは構造化処理時には利用されません。データセット開設後にデータカタログを作成する際の入力画面の雛形として利用されます。
+
+適用箇所と適用事例として、データカタログの作成画面を紹介します。
+
+<center><img src="images/datacatalog_edit_capture.png" width="600"></center>
 
 
 <div class="page"/>
