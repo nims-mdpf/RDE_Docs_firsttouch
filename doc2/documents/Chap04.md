@@ -405,9 +405,9 @@ invoice.schema.jsonはinvoice.jsonのJSONスキーマであり、JSONのバリ�
 | ソース | 項目 | キー名 |説明|
 |---|---|---|---|
 | invoice | basicのdateSubmitted| invoice.basic.date_submitted |　記入年月日 |
-| invoice | basicのdata_owner | invoice.basic.data_oner | データの所有者と所属 |
+| invoice | basicのdata_owner | invoice.basic.data_owner | データの所有者と所属 |
 | invoice | basicのdataName | invoice.basic.data_name | データ名 |
-| invoice | basicのinstrumentId | invoice.basic.instrument_id | 実験ID | 
+| invoice | basicのexperimentId | invoice.basic.experiment_id| 実験ID | 
 | invoice | basicのdescription | invoice.basic.description | データの説明 | 
 
 
@@ -435,7 +435,7 @@ invoice.schema.jsonはinvoice.jsonのJSONスキーマであり、JSONのバリ�
 
 | ソース | 項目 | キー名 |説明|
 |---|---|---|---|
-| invoice | customのキー名 | invoice.custom.<キー名> | 送状のcustom項目。定義した項目がキャメルケースの場合はケバブ形式で変換して指定する |
+| invoice | customのキー名 | invoice.custom.<キー名> | 送状のcustom項目。定義した項目がキャメルケースの場合はケバブ形式で変換して指定する。<br>例 : CamelCase → camel_case |
 | metadata | constantのキー名 | <キー名> | metadataのconstantの項目。定義した項目名をそのまま記述　|
 | metadata | variableのキー名 | <キー名> | metadataのvariableの項目。定義した項目名をそのまま記述　|
 
