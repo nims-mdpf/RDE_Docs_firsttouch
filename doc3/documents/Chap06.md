@@ -38,14 +38,13 @@ custom_module()内に、入力ファイルのチェックロジックを追加�
 ```python
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     # Check input file
-    input_dir = srcpaths.inputdata
-    input_files = list(input_dir.glob("*"))
+    input_files = resource_paths.rawfiles
     if len(input_files) == 0:
         raise StructuredError("ERROR: input data not found")
-    
+
     if len(input_files) > 1:
         raise StructuredError("ERROR: input data should be one file")
-    
+
     raw_file_path = input_files[0]
     if raw_file_path.suffix.lower() != ".data":
         raise StructuredError(
@@ -54,8 +53,9 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 ```
 
 > 前の処理で追加していた`print("Hello RDE!")`は不要ですので、削除します。
+> 本書の以前の版では`input_dir = srcpaths.inputdata`、`input_files = list(input_dir.glob("*"))`として入力ファイルを求めていました。その方法ではExcelインボイスでの登録時に問題が発生(入力ファイルを正しく認識できない)します。いずれのモードでも正しく処理が進むように、上で示した方法を利用してください。
 
-1. 1つ目のif文で、inputdata/フォルダに存在するファイルの個数が0かどうかをチェックし、0だったらエラーとして処理します。
+1. 1つ目のif文で、入力ファイルの個数が0かどうかをチェックし、0だったらエラーとして処理します。
 2. 次のif文で、同ファイル個数が1より多いかどうかをチェックし、多かったらエラーとして処理します。
 3. その後、ファイルが1個だけ存在することが確定していますので、そのファイルの拡張子が".data"かどうかをチェックし、そうでない場合はエラーとして処理します。
 
@@ -180,10 +180,12 @@ mv data/inputdata/sample.dat data/inputdata/sample.data
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 
 (tenv) $ python main.py
 (tenv) $ echo $?
 0
 ```
 
-> 何かを表示する(→標準出力に出力する)処理を実装していませんので、この時点では(プログレスバー以外は)何も表示されません。
+> 何かを表示する(→標準出力に出力する)処理を実装していませんので、この時点では何も表示されません。

@@ -28,8 +28,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     raw_data_df = None
     raw_meta_obj = None
     #
-    input_dir = srcpaths.inputdata
-    input_file = input_dir / "sample.data"
+    input_file = resource_paths.rawfiles[0] # read one file only
 
     with open(input_file) as f:
         lines = f.readlines()
@@ -72,8 +71,6 @@ pprint()などを使って内容を確認できます。現在の`custom_module`
     pprint(raw_meta_obj)
 ：
 ```
-
-> この4行は対象のオブジェクトの内容確認のために追加するものです。後続の処理では使いませんので、確認後削除してください。
 
 上記4行を追記したのち、実行すると以下の様になります。
 
@@ -132,5 +129,5 @@ pprint()などを使って内容を確認できます。現在の`custom_module`
 
 > 以降の章で、これら(raw_data_dfとraw_meta_obj)を利用します。
 
-> 上で確認のために追記した4行は、以下不要となりますので削除(またはコメントアウト)してください。
+> 上で確認のために追記した4行は、対象のオブジェクトの内容確認のために追加したものです。後続の処理では使いませんので、確認後削除してください。
 

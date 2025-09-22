@@ -26,28 +26,28 @@ $ source tenv/bin/activate
 
 ### フォルダ構成
 
-初級編では、`$HOME/tutorial`フォルダを利用しましたが、応用編では`$HOME/advanced`にファイルを設置することとします。
+初級編では、`$HOME/handson/tutorial`フォルダを利用しましたが、応用編では`$HOME/handson/advanced`にファイルを設置することとします。
 
 フォルダを作成し、RDEToolKitの初期化を実施します。
 
 ```bash
-(tenv) $ cd $HOME
+(tenv) $ cd $HOME/handson
 
 (tenv) $ mkdir advanced
 (tenv) $ cd advanced
 
 (tenv) $ python -m rdetoolkit init
 Ready to develop a structured program for RDE.
-Created: /home/devel/advanced/container/requirements.txt
-Created: /home/devel/advanced/container/Dockerfile
-Created: /home/devel/advanced/container/data/invoice/invoice.json
-Created: /home/devel/advanced/container/data/tasksupport/invoice.schema.json
-Created: /home/devel/advanced/container/data/tasksupport/metadata-def.json
-Created: /home/devel/advanced/templates/tasksupport/invoice.schema.json
-Created: /home/devel/advanced/templates/tasksupport/metadata-def.json
-Created: /home/devel/advanced/input/invoice/invoice.json
+Created: /home/devel/handson/advanced/container/requirements.txt
+Created: /home/devel/handson/advanced/container/Dockerfile
+Created: /home/devel/handson/advanced/container/data/invoice/invoice.json
+Created: /home/devel/handson/advanced/container/data/tasksupport/invoice.schema.json
+Created: /home/devel/handson/advanced/container/data/tasksupport/metadata-def.json
+Created: /home/devel/handson/advanced/templates/tasksupport/invoice.schema.json
+Created: /home/devel/handson/advanced/templates/tasksupport/metadata-def.json
+Created: /home/devel/handson/advanced/input/invoice/invoice.json
 
-Check the folder: /home/devel/advanced
+Check the folder: /home/devel/handson/advanced
 Done!
 ```
 
@@ -61,12 +61,12 @@ Done!
 (tenv) $ cd container/
 
 (tenv) $ pwd
-/home/devel/advanced/container
+/home/devel/handson/advanced/container
 
-(tenv) $ cp $HOME/tutorial/container/data/inputdata/sample.data data/inputdata/
-(tenv) $ cp $HOME/tutorial/container/data/invoice/invoice.json data/invoice/
-(tenv) $ cp $HOME/tutorial/container/data/tasksupport/invoice.schema.json data/tasksupport/
-(tenv) $ cp $HOME/tutorial/container/data/tasksupport/metadata-def.json data/tasksupport/
+(tenv) $ cp $HOME/handson/tutorial/container/data/inputdata/sample.data data/inputdata/
+(tenv) $ cp $HOME/handson/tutorial/container/data/invoice/invoice.json data/invoice/
+(tenv) $ cp $HOME/handson/tutorial/container/data/tasksupport/invoice.schema.json data/tasksupport/
+(tenv) $ cp $HOME/handson/tutorial/container/data/tasksupport/metadata-def.json data/tasksupport/
 ```
 
 invoice.jsonを確認し、変更されている場合は、初期状態に戻します。
@@ -96,7 +96,7 @@ invoice.jsonを確認し、変更されている場合は、初期状態に戻�
 初期化用スクリプトも初級編で使用したものと同じものを利用するのでコピーします。
 
 ```bash
-(tenv) $ cp $HOME/tutorial/container/reinit.sh .
+(tenv) $ cp $HOME/handson/tutorial/container/reinit.sh .
 ```
 
 初期化用スクリプトが正常に実行できることを確認します。
@@ -111,6 +111,8 @@ invoice.jsonを確認し、変更されている場合は、初期状態に戻�
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 ```
 
 ### ベーススクリプト
@@ -137,7 +139,7 @@ from modules.interfaces import IInputFileParser
 
 class FileReader(IInputFileParser):
 
-    def read(self, srcpath: Path) -> tuple[MetaType, pd.DataFrame]:
+    def read(self, path: Path) -> tuple[MetaType, pd.DataFrame]:
         # Caution! dummy data
         self.data = pd.DataFrame([[1, 11], [2, 22], [3, 33]])
         self.meta: dict[str, str | int | float | list[Any] | bool] = {"meta1": "value1", "meta2": 2}  # Example with int value to match the expected type
@@ -396,20 +398,23 @@ data
 │   └── invoice.json
 ├── invoice_patch (★)
 ├── logs (★)
+│   └── rdesys.log (★)
 ├── main_image (★)
 ├── meta (★)
+│   └── metadata.json (★)
 ├── nonshared_raw (★)
 │   └── sample.data (★)
 ├── other_image (★)
 ├── raw (★)
 ├── structured (★)
+│   └── sample.csv (★)
 ├── tasksupport
 │   ├── invoice.schema.json
 │   └── metadata-def.json
 ├── temp (★)
 └── thumbnail (★)
 
-15 directories, 5 files
+15 directories, 8 files
 ```
 
 * 実行により、新規に作成された部分に"(★)"を付けています。
@@ -438,9 +443,12 @@ system:
 
 > 設定ファイルを使う場合、"main.py"内で設定内容を指定する必要はありません。"main.py"内で設定を行った場合は上記ファイルは**利用されません**。
 >
-> 設定ファイルは、`rdeconfig.yaml`の他、`rdeconfig.yml`や`pyproject.toml`が利用できます。
+> 設定ファイルの名称としては、`rdeconfig.yaml`の他、`rdeconfig.yml`や`pyproject.toml`が利用できます。
 >
 > RDEToolKit内では、main.py内の設定 → rdeconfig.yaml → rdeconfig.yml → pyproject.tomlの順に確認し、最初に見つかったもの**だけ**を使用します。
+
+> また一部のバージョンのRDEToolKit(v1.3.0など)で、`save_raw: False`と`save_nonshared_raw: False`のように双方を`False`にした場合にエラーとなる場合があります。本書の例のように、双方を`False`にしたい場合は、その他のバージョンのRDEToolKitを利用してください。
+> RDEToolKit v1.3.1以降ではエラーにならないように修正されていますので、特に制限がなければ最新版の利用を推奨します。
 
 上記設定ファイルを設置後、それまでの実行で出力された出力ファイルを削除し、再度実行してみます。
 
@@ -483,7 +491,7 @@ data
 
 先に示したdatasets_process.pyには、ダミー処理として不必要な処理が多く設定されていますので、処理を記述する前に削除します。
 
-具体的には、"custom_module():"内の記述をすべて削除します。
+具体的には、"custom_module()"関数内の記述をすべて削除します。
 
 ```python
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
@@ -496,8 +504,10 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 この状態で`python main.py`を実行すると、以前同様出力用のフォルダが作成されます。
 
 ```bash
-(tenv) $ python main.py 
+(tenv) $ ./reinit.sh
+:
 
+(tenv) $ python main.py 
 (tenv) $ tree data
 data
 ├── attachment
@@ -523,6 +533,8 @@ data
 
 15 directories, 6 files
 ```
+
+> 上記削除により、`data/meta/metadata.json`と`data/structured/sample.csv`の2つのファイルが生成されなくなります。
 
 ### コーディネータクラスのインスタンスの準備
 
@@ -556,11 +568,8 @@ from rdetoolkit.errors import StructuredError
 ：
 class FileReader(IInputFileParser):
     ：
-    def check(self, srcpaths: Path) -> bool:
+    def check(self, input_files: list[Path]) -> bool:
         # Check input file
-        input_dir = srcpaths.inputdata
-        input_files = list(input_dir.glob("*"))
-
         if len(input_files) == 0:
             raise StructuredError("ERROR: input data not found")
 
@@ -575,6 +584,7 @@ class FileReader(IInputFileParser):
 
         return True
 ```
+
 > 関数化に伴い、最後に"return True"が追加されています。真偽値の戻り値が期待されますが、True以外の場合は、raise処理が実行されるため、False(偽)が返ることはありません。同様にraise処理が実行された場合は、それ以降は実行されませんので、else句でうける必要もないので、ここでは、elif/else句を使わない形を使用しています。
 >
 > readメソッドについては後で修正しますので、この時点では変更しません。
@@ -586,7 +596,7 @@ class FileReader(IInputFileParser):
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Check input file
-    coordinator.file_reader.check(srcpaths)
+    coordinator.file_reader.check(resource_paths.rawfiles)
 ：
 ```
 
@@ -610,15 +620,15 @@ measurement_date=2023/1/25 23:08
 ```bash
 (tenv) $ touch data/inputdata/test.data
 
-(tenv) $ python main.py
+(tenv) $ python main.py 
 
 Traceback (simplified message):
 Call Path:
-   File: /home/devel/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
-    └─ File: /home/devel/advanced/container/modules/datasets_process.py, Line: 35 in dataset()
-        └─ File: /home/devel/advanced/container/modules/datasets_process.py, Line: 30 in custom_module()
-            └─ File: /home/devel/advanced/container/modules/inputfile_handler.py, Line: 24 in check()
-                └─> L24: raise StructuredError("ERROR: input data should be one file") 🔥
+   File: /home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
+    └─ File: /home/devel/handson/advanced/container/modules/datasets_process.py, Line: 44 in dataset()
+        └─ File: /home/devel/handson/advanced/container/modules/datasets_process.py, Line: 29 in custom_module()
+            └─ File: /home/devel/handson/advanced/container/modules/inputfile_handler.py, Line: 27 in check()
+                └─> L27: raise StructuredError("ERROR: input data should be one file") 🔥
 
 Exception Type: StructuredError
 Error: ERROR: input data should be one file
@@ -648,20 +658,31 @@ modules/invoice_handler.py
 ```python
 from pathlib import Path
 
-from rdetoolkit.core import DirectoryOps
+from rdetoolkit.errors import StructuredError
 from rdetoolkit.invoicefile import InvoiceFile
 
 
-class InvoiceParser(InvoiceFile):
+class InvoiceParser():
     """RDE invoice.json handle
     """
+    additional_title = "(2024)"
 
-    def __init__(self, invoiceFile):
-        super().__init__(invoiceFile)
+    def __init__(self):
+        self.invoice_file = None
+        self.invoice_obj = None
+        self.raw_dir = None
+        self.nonshared_raw_dir = None
+
+    def parse(self, invoice_file):
+        self.invoice_path = invoice_file
+        self.invoice_obj = InvoiceFile(invoice_file)
 
     @property
     def is_private_raw(self) -> bool:
-        invoice_dict = self.invoice_obj
+        if self.invoice_obj is None:
+            raise StructuredError("ERROR: invoice does not set")
+
+        invoice_dict = self.invoice_obj.invoice_obj
         # Check private or not
         custom = invoice_dict.get("custom")
         if custom is None:
@@ -672,34 +693,43 @@ class InvoiceParser(InvoiceFile):
         # other case -> "private"
         return True
 
+    def set_dirs(self, *, raw_dir: Path|None = None, nonshared_raw_dir: Path|None = None):
+        self.raw_dir = raw_dir
+        self.nonshared_raw_dir = nonshared_raw_dir
+
     def change_title(self):
+        if self.invoice_obj is None:
+            raise StructuredError("ERROR: invoice does not set")
         # Update invoice title
         original_data_name = self.invoice_obj["basic"]["dataName"]
-        additional_title = "(2024)"
+        additional_title = self.additional_title
         if original_data_name.find(additional_title) < 0:
             # update title if not applied yet
             self.invoice_obj["basic"]["dataName"] = \
                 original_data_name + " / " + additional_title
             # Overwrite
             invoice_file_new = self.invoice_path
-            self.overwrite(invoice_file_new)
+            self.invoice_obj.overwrite(invoice_file_new)
 
     def backup(self):
         # Backup(=Copy) invoice.json to shared/nonshared folder
         is_private_raw = self.is_private_raw
         invoice_file = self.invoice_path
-        ops = DirectoryOps("data")
         if is_private_raw:
-            raw_dir = ops.nonshared_raw.path
+            backup_dir = self.nonshared_raw_dir
         else:
-            raw_dir = ops.raw.path
-        invoice_file_backup = Path(raw_dir) / "invoice.json.orig"
-        InvoiceFile.copy_original_invoice(invoice_file, invoice_file_backup)
+            backup_dir = self.raw_dir
+        # check backup dir 
+        if backup_dir is None:
+            raise StructuredError("ERROR: backup dir does not set")
+
+        invoice_backup_file = backup_dir / "invoice.json.orig"
+        InvoiceFile.copy_original_invoice(invoice_file, invoice_backup_file)
 ```
 
-> 上位(datasetes_process.pyのdataset()関数、もしくはcustom_module()関数)で利用していた変数`resource_paths`はここでは利用できませんので、DirectoryOpsクラスを用いて適切なフォルダ名を取得しています。実行時の引数としてresource_pathsを追加して、本処理の中では、それを利用するようにコーディングする方法もあります。
+> 上位(datasetes_process.pyのdataset()関数、もしくはcustom_module()関数)で利用していた変数`resource_paths`はここでは利用できませんので、`set_dirs()`メソッドを利用してセットするようにしています。
 >
-> 以前のRDEToolKit(v1.0.4以前)では、`StorageDir`クラスを用いていました。v1.1.0ではまだ`StorageDir`クラスを利用できますが、今後は、`DirectoryOps`クラスを使用してください。(本件は今後変更になる可能性があります。つまり今後もStorageDirクラスを継続して使用するようになるかもしれません。)
+> `StorageDir`クラスや`DirectoryOps`クラスを使用してしても実装できますが、Excelインボイス利用時の処理などが複雑になります。上記で示しているようにresource_pathsの内容をそのまま利用することをお勧めします。
 
 これらを使って処理を実行するように"modules/datasets_process.py"に追加します。
 
@@ -707,21 +737,50 @@ class InvoiceParser(InvoiceFile):
 ：
 from modules.invoice_handler import InvoiceParser
 ：
+class CustomProcessingCoordinator:
+
+    def __init__(
+        self,
+        file_reader: FileReader,
+        meta_parser: MetaParser,
+        graph_plotter: GraphPlotter,
+        structured_processor: StructuredDataProcessor,
+        invoice_parser: InvoiceParser,
+    ):
+        self.file_reader = file_reader
+        self.meta_parser = meta_parser
+        self.graph_plotter = graph_plotter
+        self.structured_processor = structured_processor
+        self.invoice_parser = invoice_parser
+
+
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
 
-    coordinator = CustomProcessingCoordinator(FileReader(), MetaParser(), GraphPlotter(), StructuredDataProcesser())
+    coordinator = CustomProcessingCoordinator(
+             FileReader(),
+             MetaParser(),
+             GraphPlotter(),
+             StructuredDataProcessor(),
+             InvoiceParser(),
+    )
 
     # Check input file
-    coordinator.file_reader.check(srcpaths)
+    coordinator.file_reader.check(resource_paths.rawfiles)
 
     # Read and Update Invoice
-    invoice_file = srcpaths.invoice / 'invoice.json'
-    invoice = InvoiceParser(invoice_file)
+    invoice = coordinator.invoice_parser
+    invoice.parse(resource_paths.invoice / "invoice.json")
+    invoice.set_dirs(
+        raw_dir = resource_paths.raw,
+        nonshared_raw_dir = resource_paths.nonshared_raw,
+    )
     invoice.backup()
     invoice.change_title()
 ：
 ```
 
+> `CustomProcessingCoordinator`クラスに、`InvoiceParser`クラスのインスタンスも管理するように変更します。それに伴い`coordinator`変数を初期化する部分が長くなったので、複数行になるように変更します。
+>
 > 実行する順番に注意してください。invoice.jsonの変更を実施するメソッドの前にbackupメソッドを実行しないと、変更後の内容を"バックアップ"することになります。
 
 main.pyを実行します。
@@ -733,9 +792,9 @@ main.pyを実行します。
 │   ├── nonshared_raw
 │   │   └── invoice.json.orig
 :
-(tenv) $ diff -ru data/nonshared_raw/invoice.json.orig data/invoice/invoice.json 
---- data/nonshared_raw/invoice.json.orig        2025-05-08 08:34:19.863414308 +0000
-+++ data/invoice/invoice.json   2025-05-08 08:34:19.864414308 +0000
+(tenv) $ diff -ru data/nonshared_raw/invoice.json.orig data/invoice/invoice.json
+--- data/nonshared_raw/invoice.json.orig        2025-09-04 15:53:19.019172504 +0900
++++ data/invoice/invoice.json   2025-09-04 15:53:19.019172504 +0900
 @@ -3,7 +3,7 @@
      "basic": {
          "dateSubmitted": "2023-01-26",
@@ -767,14 +826,13 @@ modules/inputfile_handler.py
 ```python
 import io
 ：
-    def read(self, srcpaths: Path) -> tuple[MetaType, list[pd.DataFrame]]:
+    def read(self, input_files: list[Path]) -> tuple[MetaType, list[pd.DataFrame]]:
         # Read input data
         DELIM = "="
         rawDataDf = None
         rawMetaObj = None
         #
-        input_dir = srcpaths.inputdata
-        input_file = input_dir / "sample.data"
+        input_file = input_files[0]
 
         with open(input_file) as f:
             lines = f.readlines()
@@ -815,7 +873,7 @@ import io
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Read input data
-    meta, df_data = coordinator.file_reader.read(srcpaths)
+    meta, df_data = coordinator.file_reader.read(resource_paths.rawfiles)
 
 ：
 ```
@@ -823,6 +881,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 pprintなどを使って内容を確認すると以下の様になっています。
 
 meta
+
 ```
 {'data_title': 'data_title 2',
  'measurement_date': '2023/1/25 23:08',
@@ -832,6 +891,7 @@ meta
 ```
 
 df_data
+
 ```
 [       x  series1
 0    1.0    101.0
@@ -980,12 +1040,13 @@ class MetaParser(IMetaParser[MetaType]):
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Read input data
-    meta, df_data = coordinator.file_reader.read(srcpaths)
+    meta, df_data = coordinator.file_reader.read(resource_paths.rawfiles)
 
     # Meta  (※ここ以下を追加する)
-    coordinator.meta_parser.parse_from_invoice(invoice.invoice_obj)
-    coordinator.meta_parser.parse_from_inputdata(meta, df_data)
-    coordinator.meta_parser.save_meta(
+    meta_parser = coordinator.meta_parser 
+    meta_parser.parse_from_invoice(invoice.invoice_obj)
+    meta_parser.parse_from_inputdata(meta, df_data)
+    meta_parser.save_meta(
         resource_paths.meta.joinpath("metadata.json"),
         Meta(srcpaths.tasksupport.joinpath("metadata-def.json"))
     )
@@ -1028,7 +1089,7 @@ class StructuredDataProcessor(IStructuredDataProcessor):
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Read input data
-    meta, df_data = coordinator.file_reader.read(srcpaths)
+    meta, df_data = coordinator.file_reader.read(resource_paths.rawfiles)
 :
     # Save csv  (※ここ以下を追加する)
     coordinator.structured_processor.to_csv(df_data, resource_paths.struct)
@@ -1098,10 +1159,10 @@ class GraphPlotter(IGraphPlotter[pd.DataFrame]):
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Read input data
-    meta, df_data = coordinator.file_reader.read(srcpaths)
+    meta, df_data = coordinator.file_reader.read(resource_paths.rawfiles)
 :
     # Graph  (※ここ以下を追加する)
-    const_meta_info = coordinator.meta_parser.const_meta_info
+    const_meta_info = meta # or coordinator.meta_parser.const_meta_info
     coordinator.graph_plotter.plot(
         df_data,
         resource_paths,
@@ -1117,7 +1178,9 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 
 サムネイル画像を扱うクラスが用意されていませんので、新規に作成します。
 
-基礎編のように、独自にコーディングしてもよいですが、RDEToolKit v1.0.2よりサムネイル画像作成に利用出来そうな関数が追加になったので、ここではそれを使ってサムネイル画像をつくります。
+基礎編のように、独自にコーディングしてもよいですが、RDEToolKit v1.0.2よりサムネイル画像作成に利用できる関数が追加になったので、ここではそれを使ってサムネイル画像をつくります。
+
+以下の内容で、新規に作成します。
 
 modules/thumbnail_handler.py
 
@@ -1158,7 +1221,7 @@ from modules.thumbnail_handler import ThumbnailDrawer
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Graph
-    const_meta_info = coordinator.meta_parser.const_meta_info
+    const_meta_info = meta # or coordinator.meta_parser.const_meta_info
     coordinator.graph_plotter.plot(
         df_data,
         resource_paths,
@@ -1173,9 +1236,11 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 ：
 ```
 
-> グラフ画像をもとにサムネイル画像を作成しますので、グラフ画像生成の後に実行する必要があります。
+> グラフ画像をもとにサムネイル画像を作成しますので、グラフ画像生成の**後に**実行する必要があります。
 >
 > また、基礎編でのサムネイル画像作成とはことなり、縦横比の調整などは行っていないため、上記実装ではサムネイル画像の左右端に白色帯が作成されてしまいます。問題がある場合は、作成されるサムネイル画像の縦横サイズ設定を変更するか、基礎編での実装を使ってください。
+>
+> invoiceファイルの場合は、`CustomProcessingCoordinator`クラスに追加しましたが、ここでは追加せずに利用するようにしています。追加する形で利用しても問題ありません。
 
 ### 生データの永続化
 
@@ -1194,12 +1259,13 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
     is_private_raw = invoice.is_private_raw
     raw_dir = resource_paths.nonshared_raw if is_private_raw else resource_paths.raw
-    input_dir = srcpaths.inputdata
-    input_file = input_dir / "sample.data"
-    shutil.copy(input_file, raw_dir)
+    for input_file in resource_paths.rawfiles:
+        shutil.copy(input_file, raw_dir)
 ```
 
-> invoice.jsonの設定内容を使いますので、invoiceの処理のあとに記述する必要があります。
+> invoice.jsonの設定内容を使いますので、invoiceの処理の**後に**に記述する必要があります。
+>
+> 今回の例では、入力ファイルは1個であることが確定していますのでfor文を使う必要はありませんが、複数の入力ファイルを扱う場合と同じコードで実行できるようfor文を使っています。
 
 ### まとめ
 
@@ -1221,6 +1287,7 @@ from modules.structured_handler import StructuredDataProcessor
 from modules.invoice_handler import InvoiceParser
 from modules.thumbnail_handler import ThumbnailDrawer
 
+
 class CustomProcessingCoordinator:
 
     def __init__(
@@ -1229,47 +1296,53 @@ class CustomProcessingCoordinator:
         meta_parser: MetaParser,
         graph_plotter: GraphPlotter,
         structured_processor: StructuredDataProcessor,
+        invoice_parser: InvoiceParser,
     ):
         self.file_reader = file_reader
         self.meta_parser = meta_parser
         self.graph_plotter = graph_plotter
         self.structured_processor = structured_processor
+        self.invoice_parser = invoice_parser
 
 
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
-
-    coordinator = CustomProcessingCoordinator(FileReader(), MetaParser(), GraphPlotter(), StructuredDataProcessor())
-
+    coordinator = CustomProcessingCoordinator(
+             FileReader(),
+             MetaParser(),
+             GraphPlotter(),
+             StructuredDataProcessor(),
+             InvoiceParser(),
+    )
     # Check input file
-    coordinator.file_reader.check(srcpaths)
+    coordinator.file_reader.check(resource_paths.rawfiles)
 
     # Read and Update Invoice
-    invoice_file = srcpaths.invoice / 'invoice.json'
-    invoice = InvoiceParser(invoice_file)
+    invoice = coordinator.invoice_parser
+    invoice.parse(resource_paths.invoice / "invoice.json")
+    invoice.set_dirs(
+        raw_dir = resource_paths.raw,
+        nonshared_raw_dir = resource_paths.nonshared_raw,
+    )
     invoice.backup()
     invoice.change_title()
 
-    # Read input data
-    meta, df_data = coordinator.file_reader.read(srcpaths)
-    """
-    from pprint import pprint
-    pprint(meta)
-    print("=======")
-    pprint(df_data)
-    """
+    # Read Input File
+    meta, df_data = coordinator.file_reader.read(resource_paths.rawfiles)
+
     # Meta
-    coordinator.meta_parser.parse_from_invoice(invoice.invoice_obj)
-    coordinator.meta_parser.parse_from_inputdata(meta, df_data)
-    coordinator.meta_parser.save_meta(
+    meta_parser = coordinator.meta_parser
+    meta_parser.parse_from_invoice(invoice.invoice_obj)
+    meta_parser.parse_from_inputdata(meta, df_data)
+    meta_parser.save_meta(
         resource_paths.meta.joinpath("metadata.json"),
         Meta(srcpaths.tasksupport.joinpath("metadata-def.json"))
     )
 
     # Save csv
-    coordinator.structured_processor.to_csv(df_data, resource_paths.struct)
-
+    csv_save_path = resource_paths.struct #.joinpath("sample.csv")
+    coordinator.structured_processor.to_csv(df_data, csv_save_path)
     # Graph
-    const_meta_info = coordinator.meta_parser.const_meta_info
+    const_meta_info = meta # or coordinator.meta_parser.const_meta_info
     coordinator.graph_plotter.plot(
         df_data,
         resource_paths,
@@ -1285,15 +1358,13 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
     is_private_raw = invoice.is_private_raw
     raw_dir = resource_paths.nonshared_raw if is_private_raw else resource_paths.raw
-    input_dir = srcpaths.inputdata
-    input_file = input_dir / "sample.data"
-    shutil.copy(input_file, raw_dir)
+    for input_file in resource_paths.rawfiles:
+        shutil.copy(input_file, raw_dir)
 
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
 def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
-
     custom_module(srcpaths, resource_paths)
 ```
 
-> CustomProcessingCoordinatorに、InvoiceParserクラス、ThumbnailDrawerクラスを追記した方がよりよいものになるかもしませんが、本章ではここまでにしておきます。
+> 前述のように`CustomProcessingCoordinator`クラスに、ThumbnailDrawerクラスを追記した方がよいかもしませんが、本章ではここまでにしておきます。
 

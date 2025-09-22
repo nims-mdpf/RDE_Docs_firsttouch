@@ -75,6 +75,10 @@ series3
 
 > 本来"invoice.json"ファイルは、RDEデータ登録画面からのデータ入力で自動的に作成された状態で構造化処理に渡ってきます。ローカル開発においては適切なinvoice.jsonを作成する手段がありませんので、本書では内容が入力されたinvoice.jsonを以下の様に手動作成することにします。
 
+> 指定書式のExcelファイルに適切に設定することで、invoice.jsonを生成するツールを別途提供しています。以下のURLを参照ください。
+>
+>  https://github.com/nims-mdpf/RDE_datasettemplate-schemafile-make-tool
+
 RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以下の内容で、`data/invoice/invoice.json`ファイルを上書きします。
 
 ```json
@@ -99,58 +103,18 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "sampleId": "4d6de819-4b42-4dfe-9619-a0a0588653bc",
         "names": [
             "試料"
-        ],
-        "composition": null,
-        "referenceUrl": null,
-        "description": null,
-        "generalAttributes": [
-            {
-                "termId": "3adf9874-7bcb-e5f8-99cb-3d6fd9d7b55e",
-                "value": null
-            },
-            {
-                "termId": "0aadfff2-37de-411f-883a-38b62b2abbce",
-                "value": null
-            },
-            {
-                "termId": "0444cf53-db47-b208-7b5f-54429291a140",
-                "value": null
-            },
-            {
-                "termId": "e2d20d02-2e38-2cd3-b1b3-66fdb8a11057",
-                "value": null
-            }
-        ],
-        "specificAttributes": [
-            {
-                "classId": "52148afb-6759-23e8-c8b8-33912ec5bfcf",
-                "termId": "70c2c751-5404-19b7-4a5e-981e6cebbb15",
-                "value": null
-            },
-            {
-                "classId": "961c9637-9b83-0e9d-e60e-ffc1e2517afd",
-                "termId": "70c2c751-5404-19b7-4a5e-981e6cebbb15",
-                "value": null
-            },
-            {
-                "classId": "01cb3c01-37a4-5a43-d8ca-f523ca99a75b",
-                "termId": "dc27a956-263e-f920-e574-5beec912a247",
-                "value": null
-            }
-        ],
-        "ownerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734"
+        ]
     }
 }
 ```
+
 > "invoice_string2"に指定しているnullは、データ登録時に入力が無かったことを意味します。RDEToolKitの古いバージョンでは、スキーマチェックで異常として検知されてしまうことがありました。その場合は、RDEToolKitのバージョンを新しいものに入れ替えてテストしてください。
 >
-> "basic"中の"dataName"の末尾に"/ (2024)"のような文言が付加されている場合は、その部分を削除しておいてください。
+> 本書の後半で、タイトル("basic"中の"dataName")に変更を加える処理を実施します。"dataName"の末尾に"/ (2024)"のような文言が付加されている場合は、当該処理が正常に稼働したかの確認が難しくなるので、この時点でその部分を削除しておいてください。
 
 ## invoice.schema.jsonの生成
 
 > invoice.schema.jsonは、RDEデータ登録画面での入力画面を生成するのに用いられます。すなわち、invoice.jsonは、invoice.schema.jsonから、(少なくとも骨組みについては)生成されることになります。invoice.schema.jsonの作成は、開発者が実行する"開発"業務に含まれますが、それについては別途記述します。ここでは、以下の内容でinvoce.schema.jsonを作成(コピー&ペースト)してください。
->
-> なお、上で示した"invoice.json"には、"invoice.schema.json"には記述のない項目が含まれます。これはRDEにおいて、暗黙に必須とされる項目となっているため、invoice.schema.jsonに記述不要となっているためです(→ invoice.schema.jsonに記述してはいけません)。
 
 `data/tasksupport/invoice.schema.json`を以下の内容で上書きします。
 
@@ -161,7 +125,8 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
     "description": "None",
     "type": "object",
     "required": [
-        "custom"
+        "custom",
+        "sample"
     ],
     "properties": {
         "custom": {
@@ -209,12 +174,29 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
                     "type": "string"
                 }
             }
+        },
+        "sample" : {
+            "type": "object",
+            "label": {
+                "ja": "試料情報",
+                "en": "Sample Information"
+            },
+            "required": [
+                "names"
+            ],
+            "properties": {
+                "generalAttributes": {
+                    "type": "array",
+                    "items": [
+                    ]
+                }
+            }
         }
     }
 }
 ```
 
-> 初期化時のファイルと同じなので、何もしなくてもかまいません。 
+> RDEToolKit v1.3.2より前のバージョンでは、`data/tasksupport/invoice.schema.json`のルートノード直下の"required"句に"sample"の指定が無く、かつ、`data/invoice/invoice.json`にsample句が記述されている場合でもエラーにはなりませんでしたが、RDEToolKit v1.3.2以降のバージョンではバリデーション機能の強化に伴いエラーとなります。試料情報を入力する場合は、適切にinvoice.schema.jsonを記述する必要があります。
 
 ## metadata-def.jsonの変更
 
@@ -370,7 +352,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
     },
     "measurement date": {
         "name": {
-            "ja": "送状状測定日時",
+            "ja": "送状測定日時",
             "en": "measurement date from invoice"
         },
         "schema": {
@@ -382,7 +364,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
     },
     "invoice_number1": {
         "name": {
-            "ja": "送状状数値入力値1",
+            "ja": "送状数値入力値1",
             "en": "invoice_number1"
         },
         "schema": {
@@ -393,7 +375,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
     },
     "invoice_number2": {
         "name": {
-            "ja": "送状状数値入力値2",
+            "ja": "送状数値入力値2",
             "en": "invoice_number2"
         },
         "schema": {
@@ -426,7 +408,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
     },
     "invoice_list1": {
         "name": {
-            "ja": "送状状選択値1",
+            "ja": "送状選択値1",
             "en": "invoice_list1"
         },
         "schema": {

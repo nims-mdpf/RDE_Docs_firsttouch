@@ -11,9 +11,14 @@ RDE構造化処理プログラム中で、以降の処理を停止するよう�
 例:
 
 ```python
-    ：
+：
+def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+    print("Hello RDE!")
     raise StructuredError('*** RDE ERROR ***', 200)
+:
 ```
+
+> 前章からの継続の場合、`modules/datasets_process.py'の、`custom_module()`関数の末尾に加えてください。またpprint()は不要ですので削除してください。
 
 これを実行すると、以下の様になります。
 
@@ -23,10 +28,10 @@ Hello RDE!
 
 Traceback (simplified message):
 Call Path:
-   File: /home/devel/tenv/lib/python3.11/site-packages/rdetoolkit/exceptions.py, Line: 151 in wrapper()
-    └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 13 in dataset()
-        └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 8 in custom_module()
-            └─> L8: raise StructuredError('*** RDE ERROR ***', 200) 🔥
+   File: /home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
+    └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 14 in dataset()
+        └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 10 in custom_module()
+            └─> L10: raise StructuredError('*** RDE ERROR ***', 200) 🔥
 
 Exception Type: StructuredError
 Error: *** RDE ERROR ***
@@ -101,6 +106,8 @@ D="
 ./data/structured
 ./data/temp
 ./data/thumbnail
+./data/attachment
+./data/invoice_patch
 "
 for d in ${D};do
     echo "${d} was removed"
@@ -120,7 +127,8 @@ chmod a+x ./reinit.sh
 ローカル環境でのRDE構造化処理実行時、つまり"python main.py"の実行前に実行します。
 
 ```bash
-(tenv) $ ./reinit.sh 
+(tenv) $ ./reinit.sh
+./data/job.failed was removed
 ./data/logs was removed
 ./data/meta was removed
 ./data/main_image was removed
@@ -130,9 +138,13 @@ chmod a+x ./reinit.sh
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 ```
 
 > 表示が不要の場合は、echo文をコメントアウトするなどして調整してください。
+>
+> 結果表示の1行目(`./data/job.failed was removed`)は、`data/job.failed`ファイルが存在する場合のみ表示されます。
 
 なお、繰り返しになりますが、実際のRDEの環境では、RDE構造化処理が実行される都度、あたらしいフォルダ構成が生成されます。そのため、明示的に"前の処理で作成されたフォルダやファイルを削除する"処理は必要ありません。
 

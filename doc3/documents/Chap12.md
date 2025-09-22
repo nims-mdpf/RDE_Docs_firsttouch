@@ -37,7 +37,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     ratio_w = closure_w / img_org.width
     ratio_h = closure_h / img_org.height
     ratio = min(ratio_w, ratio_h)
-    img_re = img_org.resize((int(img_org.width * ratio), int(img_org.height * ratio)), Image.BILINEAR)  # image magickの>デフォルトに合わせてバイリニアとしている
+    img_re = img_org.resize((int(img_org.width * ratio), int(img_org.height * ratio)), Image.BILINEAR)  # image magickのデフォルトに合わせてバイリニアとしている
     img_re.save(out_img_file_path)
 ```
 
@@ -55,7 +55,7 @@ data/thumbnail
 
 > thumbnail.pngが出力されていることが確認できます。RDEシステムでは、サムネイル画像のファイル名の規定はないので、上記以外のファイル名でも問題ありません。
 >
-> ただし、現時点(2025.5.9)では、画像ファイルの形式に制限があります。GIF形式(.gif)、JPEG形式(.jpg、.jpeg)、あるいはPNG形式(.png)のいずれかである必要があります。SVG形式といった上記想定以外のファイル形式を使った場合、データセット利用ができない(登録は出来るがダウンロードできない、等)場合があります。想定される画像ファイル形式で保存するようにしてください。
+> ただし、現時点(2025年09月)では、画像ファイルの形式に制限があります。GIF形式(.gif)、JPEG形式(.jpg、.jpeg)、あるいはPNG形式(.png)のいずれかである必要があります。SVG形式といった上記想定以外のファイル形式を使った場合、データセット利用ができない(登録は出来るがダウンロードできない、等)場合があります。想定される画像ファイル形式で保存するようにしてください。
 
 ## (参考)画像データをそのままサムネイル画像として使う
 
@@ -103,6 +103,8 @@ if __name__ == '__main__':
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 
 (tenv) $ python main.py
 

@@ -60,9 +60,8 @@ from modules import datasets_process
 def main():
     config = Config(
         system=SystemSettings(
-            save_raw=False,
-            save_nonshared_raw=True,
-            save_thumbnail_image=True,
+            save_raw=True,
+            save_nonshared_raw=False,
         ),
     )
 
@@ -75,7 +74,7 @@ if __name__ == '__main__':
     main()
 ```
 
-> "save_raw"に`False`を、"save_nonshared_raw"に`True`を設定します(デフォルトはそれぞれ逆になっています)。
+> "save_raw"に`True`を、"save_nonshared_raw"に`False`を設定します(デフォルトはそれぞれ逆になっています)。
 >
 > 前述のようにコンフィグ設定(上記プログラム例の"config=～"の部分)を、外部ファイル(data/tasksupport/rdeconfig.ymlなど)に置く場合は、main.pyの修正は不要となります。
 
@@ -95,7 +94,6 @@ def main():
         system=SystemSettings(
             save_raw=False,
             save_nonshared_raw=False,
-            save_thumbnail_image=True,
         ),
     )
 
@@ -118,16 +116,13 @@ import shutil
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     ：
     # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
+
     # raw_dir = resource_paths.nonshared_raw if is_private_raw else resource_paths.raw
-    # input_dir = srcpaths.inputdata
-    # input_file = input_dir / "sample.data"
+    # input_file = resource_paths.rawfiles[0] # read one file only
     shutil.copy(input_file, raw_dir)
 ```
 
-> コピー先のフォルダは、この前の処理で変数`raw_dir`にセットしているため、そのまま利用します。
->
-> 同様に、コピーする入力ファイルについても、変数`input_file`にセットされているため、そのまま利用します。
-> そのため、上記ではコメントとしてあります。
+> 入力ファイルおよびコピー先のフォルダは、ここまでの処理で変数にセットされているため、そのまま利用します。そのため、上記ではコメントとしてあります。
 
 実行すると以下の様になります。
 

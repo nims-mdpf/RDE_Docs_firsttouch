@@ -44,6 +44,7 @@ RDEでは抽出したメタデータを、"metadata.json" というJSON形式の
 上記の流れに沿って、以下のように処理を追記します。
 
 modules/datasets-process.py
+
 ```python
 import statistics as st
 from rdetoolkit.rde2util import Meta
@@ -210,7 +211,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 }(tenv) $ 
 ```
 
-> (参考)metadata-def.jsonで定義されている"invoice_string2"の項目は、metadata.jsonには**出力されません**。これは基となるinvoice.json中で値が"Null" (ダブルクォーテーションで囲まれていないNull)、つまり画面上での入力がないためです。invoice.json中の"invoice_string2"の値(Null)をダブルクォーテーションで囲んで処理を実行すれば、文字列として処理されますのでmetadata.jsonに書き出されることが確認できます。
+> (参考)metadata-def.jsonで定義されている"invoice_string2"の項目は、metadata.jsonには**出力されません**。これは基となるinvoice.json中で値が"Null" (ダブルクォーテーションで囲まれていないNull)、つまり画面上での入力がないためです。invoice.json中の"invoice_string2"の値(→ Null)をダブルクォーテーションで囲んで処理を実行すれば、文字列として処理されますのでmetadata.jsonに書き出されることが確認できます。
 
 ## おまけ
 
