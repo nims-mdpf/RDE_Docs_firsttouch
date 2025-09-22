@@ -2,6 +2,15 @@
 
 # 変更履歴 {: #history }
 
+## 2.7.0 (2025.09.08)
+
+* 対応RDEToolKit :  v1.3.4
+* Excelインボイスモードで実行する場合でもソースコード変更が不要になるように、ソースコードを変更
+* ローカル開発環境についての記述を追加
+* invoice.schema.jsonを使ったinvoice.jsonのバリデーション強化対応
+* reinit.shの削除対象フォルダとして、`data/attachment`と`data/invoice_patch`を追加
+* 作業フォルダを`$HOME`直下から、`$HOME/handson`に変更
+
 ## 2.6.0 (2025.05.14)
 
 * 対応RDEToolKit :  v1.2.0

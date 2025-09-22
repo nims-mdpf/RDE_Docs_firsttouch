@@ -41,7 +41,7 @@ from rdetoolkit.invoicefile import InvoiceFile
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     :
     # Read invoice file
-    invoice_file = srcpaths.invoice  / "invoice.json"
+    invoice_file = resource_paths.invoice  / "invoice.json"
     invoice = InvoiceFile(invoice_file)
 
     # Check public or private
@@ -68,6 +68,21 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 >
 > `Exception Type: NameError`が表示される場合は、`from rdetoolkit.invoicefile import InvoiceFile`の追加を忘れている場合が考えられます。確認し、抜けている場合は追加してください。
 
+本書の古い版では、invoice.jsonファイルのパスを求める箇所を以下の様にしていました。
+
+```python
+    invoice_file = srcpaths.invoice  / "invoice.json"
+```
+
+しかし、上記の様にした場合、Excelインボイス等複数ファイルを一度に導入するモードでの実行時に、常に1行目に記述したインボイスの内容が有効になるといった不具合が発生します。上に示したように、`resource_paths`を使用してください
+
+```python
+    invoice_file = resource_paths.invoice  / "invoice.json"
+```
+
+> 絶対にExcelインボイスを使用することはないという場合は、`srcpaths`の方を利用しても同じ結果となりますが、将来Excelインボイスモードを使用する場合に備え、srcpathsの利用は控えてください。
+
+
 上記例では'(2024)'がタイトルに含まれていない場合にのみ追記しています。べき等性、つまり何度同じ処理をしても同じ結果となることを想定しています。より厳密には、**末尾**に当該文字列があるかどうか、といった別のチェックが必要となる場合があることに注意してください。
 
 また、今回の`invoice.json`では、以下の様にprivateつまり"非公開"を指定しています。
@@ -91,14 +106,14 @@ data/nonshared_raw/
 1 directory, 2 files
 ```
 
-入力ファイル(上記の場合は"sample.data")は、構造化処理プログラム内では何も処理を記述していませんが、デフォルト設定では"data_nonshared_raw"フォルダにコピーされるため、上記の様になります。
+入力ファイル(上記の場合は"sample.data")は、構造化処理プログラム内では何も処理を記述していませんが、RDEToolKitのデフォルト設定で"data_nonshared_raw"フォルダにコピーされるため、上記の様になります。
 
 送り状ファイルのオリジナルと変更後のものを比べると以下の様になります。
 
 ```bash
 (tenv) $ diff -ru data/nonshared_raw/invoice.json.orig data/invoice/invoice.json
---- data/nonshared_raw/invoice.json.orig        2025-05-08 06:02:01.346556446 +0000
-+++ data/invoice/invoice.json   2025-05-08 06:02:01.346556446 +0000
+--- data/nonshared_raw/invoice.json.orig        2025-09-01 17:18:56.038536493 +0900
++++ data/invoice/invoice.json   2025-09-01 17:18:56.038536493 +0900
 @@ -3,7 +3,7 @@
      "basic": {
          "dateSubmitted": "2023-01-26",
@@ -108,18 +123,11 @@ data/nonshared_raw/
          "instrumentId": "413e53fb-aec9-41f8-ae55-3f88f6cd8d41",
          "experimentId": null,
          "description": ""
-@@ -60,4 +60,4 @@
-         ],
-         "ownerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734"
-     }
--}
-+}
-\ ファイル末尾に改行がありません
 ```
 
 > 想定通りにdataNameの値が変更されていることが分かります。
 >
-> もとのinvoice.jsonファイルの作り方により、最後の`ファイル末尾に改行がありません`(およびその上の2行)は、表示されない場合があります。ファイル末尾の改行の有無は処理に影響しませんので、出力されなくても問題ありません。
+> もとのinvoice.jsonファイルの作り方により、最後に`ファイル末尾に改行がありません`と表示される場合があります。ファイル末尾の改行の有無は処理に影響しませんので、出力されなくても問題ありません。
 
 なお、上記実装は、readf_jsonとwritef_jsonを使って以下の様に記述することもできます。
 
@@ -130,7 +138,7 @@ from rdetoolkit.fileops import readf_json, writef_json
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     :
     # Read invoice file
-    invoice_file = srcpaths.invoice  / "invoice.json"
+    invoice_file = resource_paths.invoice  / "invoice.json"
     invoice = readf_json(invoice_file)
 
     # Check public or private
@@ -149,16 +157,10 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
         invoice["basic"]["dataName"] = original_data_name + " / " + additional_title
         invoice_file_new = resource_paths.invoice  / "invoice.json"
         writef_json(invoice_file_new, invoice)
-    ：
-    ：
-    ：
-    # Merge 2 types of metadata
-    const_meta_info = raw_meta_obj | invoice["custom"]
-    repeated_meta_info = meta_vars
     ：    
 ```
 
-> この方法を使う場合は、`import InvoiceFile`は不要となります。
+> この方法を使う場合は、`import InvoiceFile`は不要となります。代わりに`import readf_json, writef_json`の追加が必要になります。
 >
 > こちらを使う場合も、import文の記述を忘れがちですので、注意してください。
 

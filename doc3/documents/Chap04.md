@@ -105,7 +105,34 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 Hello RDE!
 ```
 
-> RDEToolKit v1.1.0より、実行時にプログレスバー(進行を示す棒グラフ)が表示されるようになりました。本書では、プログレスバーに関する記述は省略します。
+この時点で、以下のようなエラーがでる場合があります。
+
+```bash
+(tenv) $ python main.py 
+Hello RDE!
+Traceback (most recent call last):
+  File "/home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/workflows.py", line 310, in run
+    status, error_info, mode = _process_mode(
+                               ^^^^^^^^^^^^^^
+  File "/home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/workflows.py", line 221, in _process_mode
+    raise StructuredError(emsg, status.error_code or 999)
+rdetoolkit.exceptions.StructuredError: Processing failed in Invoice mode: Error in validating invoice.json:
+1. Field: sample
+   Type: required_fields_only
+   Context: Field 'sample' is not allowed. Only required fields ['basic', 'custom', 'datasetId'] are permitted in invoice.json
+:
+```
+
+これは、RDEToolKit v1.3.3からバリデーション処理が変更になり、`invoice.schema.json`に定義のない項目が`invoice.json`に含まれている場合に異常として処理するように変更になったことが原因です。
+
+* 実際のRDEシステムで稼働する際は、invoice.schema.jsonに定義のない情報が含まれるinvoice.jsonが作成されることはないため、上記のようなエラーは発生しません。
+
+このエラーの対処は、以下の2つが考えられます。
+
+* invoice.jsonからsample部分を削除する。
+* invoice.schema.jsonに、sampleに関する定義を追加し、requiredに`sample`も加える。
+
+古いバージョンのsamples.zipに含まれるinvoice.jsonとinvoice.schema.jsonの組み合わせで上記エラーが発生する場合があります。上記エラーが発生した際には、3章で示しているinvoice.schema.jsonと同じものが`data/tasksupport/invoice.schema.json`にセットされているかを確認し、違っている場合は、3章で示したものと同じになるように修正してください。
 
 なお、Python コードのスタイルガイド(→ https://pep8-ja.readthedocs.io/ja/latest/ )には以下の様にあります。
 
@@ -173,7 +200,7 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 実行結果は、同じものとなります。
 
 ```bash
-(tenv) $ python main.py 
+(tenv) $ python main.py
 Hello RDE!
 ```
 
@@ -197,11 +224,14 @@ from rdetoolkit.exceptions import StructuredError
 from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
 
 
-@catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
-def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     print("Hello RDE!")
     pprint(srcpaths)
-    pprint(resource_paths) 
+    pprint(resource_paths)
+
+@catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
+def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+    custom_module(srcpaths, resource_paths)
 ```
 
 上記の様にして実行すると以下の様になります。
@@ -212,7 +242,7 @@ Hello RDE!
 RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
                  invoice=PosixPath('data/invoice'),
                  tasksupport=PosixPath('data/tasksupport'),
-                 config=Config(system=SystemSettings(extended_mode=None, save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=False)))
+                 config=Config(system=SystemSettings(extended_mode=None, save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=False), smarttable=None))
 RdeOutputResourcePath(raw=PosixPath('data/raw'),
                       nonshared_raw=PosixPath('data/nonshared_raw'),
                       rawfiles=(PosixPath('data/inputdata/sample.data'),),
@@ -234,7 +264,7 @@ RdeOutputResourcePath(raw=PosixPath('data/raw'),
 
 以上をまとめると、以下の様になります。
 
-#### srcpath(入力ファイル、設定値)
+#### srcpath(入力フォルダ、設定値)
 
 
 | # | 変数名 | 意味 | 備考 |
@@ -249,16 +279,21 @@ RdeOutputResourcePath(raw=PosixPath('data/raw'),
 例1)
 
 ```python
-invoiceFile = srcpaths.invoice.joinpath("invoice.json")
+invoice_file = srcpaths.invoice.joinpath("invoice.json")
 ```
 
 例2)
 
 ```python
-invoiceFile = srcpaths.invoice / "invoice.json"
+invoice_file = srcpaths.invoice / "invoice.json"
 ```
 
 > 上記例1と例2は、invoice.jsonファイルを示すPathオブジェクトです。どちらを指定しても同じ意味です。本書では主に後者を用いることにします。
+
+ただし、`srcpaths.inputdata`と`srcpaths.invoice`の利用には注意が必要です。Excelインボイス方式など複数のファイルを一度に処理するモードや、複数のインボイスをExcel形式などで一度に登録して利用する際は、入力ファイルとして後述する`resource_paths.rawfiles`を、invoiceファイルが格納されているフォルダとして`resource_paths.invoice`を使う必要があります。
+
+> インボイスモードだけを利用する場合は、srcpathsを利用しても問題ありませんが、その場合Excelインボイス利用時にソース改変が必要となります。通常のインボイスモード利用時とExcelインボイス利用時でソース改変が不要になるよう、本書ではresource_pathsを利用して必要な情報を取得しています。
+
 
 #### resource_paths(出力フォルダ、ファイル)
 
@@ -286,15 +321,15 @@ invoiceFile = srcpaths.invoice / "invoice.json"
 例1)
 
 ```python
-thumbnailPath =  resource_paths.thumbnail
+thumbnail_path =  resource_paths.thumbnail
 ```
 
 例2)
 
 ```python
-inputFiles = resource_paths.rawfiles
-for inputFile in inputFiles: 
-    print(inputFile)
+input_files = resource_paths.rawfiles
+for input_file in input_files: 
+    print(input_file)
 ```
 
 > resource_paths.rawfilesは、入力ファイルが1個しかない場合でも、"配列"としてセットされます。

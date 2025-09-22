@@ -27,12 +27,12 @@ $ source tenv/bin/activate
 
 ### フォルダ構成
 
-応用編2では"$HOME/advanced2"にファイルを設置することとします。
+応用編2では"$HOME/handson/advanced2"にファイルを設置することとします。
 
 フォルダを作成し、RDEToolKitの初期化を実施します。
 
 ```bash
-(tenv) $ cd $HOME
+(tenv) $ cd $HOME/handson
 
 (tenv) $ mkdir advanced2
 (tenv) $ cd advanced2
@@ -64,12 +64,12 @@ Done!
 (tenv) $ cd container/
 
 (tenv) $ pwd
-/home/devel/advanced2/container
+/home/devel/handson/advanced2/container
 
-(tenv) $ cp $HOME/tutorial/container/data/inputdata/sample.data data/inputdata/
-(tenv) $ cp $HOME/tutorial/container/data/invoice/invoice.json data/invoice/
-(tenv) $ cp $HOME/tutorial/container/data/tasksupport/invoice.schema.json data/tasksupport/
-(tenv) $ cp $HOME/tutorial/container/data/tasksupport/metadata-def.json data/tasksupport/
+(tenv) $ cp $HOME/handson/tutorial/container/data/inputdata/sample.data data/inputdata/
+(tenv) $ cp $HOME/handson/tutorial/container/data/invoice/invoice.json data/invoice/
+(tenv) $ cp $HOME/handson/tutorial/container/data/tasksupport/invoice.schema.json data/tasksupport/
+(tenv) $ cp $HOME/handson/tutorial/container/data/tasksupport/metadata-def.json data/tasksupport/
 ```
 
 ### 初期化用スクリプト
@@ -77,7 +77,7 @@ Done!
 初期化用スクリプトは初級編で使用したものと同じものを利用するのでコピーします。
 
 ```bash
-(tenv) $ cp $HOME/tutorial/container/reinit.sh .
+(tenv) $ cp $HOME/handson/tutorial/container/reinit.sh .
 ```
 
 初期化用スクリプトが正常に実行できることを確認します。
@@ -92,6 +92,8 @@ Done!
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 ```
 
 ### invoice.json
@@ -155,9 +157,12 @@ save_nonshared_raw = false
 
 ### ログ出力
 
+RDEToolKitは、RDEToolKitが行った`作業`を、`data/logs/rdesys.log`ファイルにログ出力します。
+ここでは、上記とは別に、独自のログファイル出力を実装します。
+
 RDEToolKit v1.1.0から、ユーザログ出力用の専用クラスが実装されましたので、それを使うことにします。
 
-> デフォルトでは、ユーザログとしてdata/logs/rdeuser.logへの書き込みと、画面への出力の双方を実施する内容となっています。
+> ユーザログは`data/logs/rdeuser.log`への書き込みと、画面への出力の片方、または双方を実装時に選択することができます。
 
 利用するには、datasets_process.pyなどで、以下のような設定を行います。
 
@@ -176,32 +181,37 @@ def Huga():
 
 @log_decorator()
 def Hoge():
-    pass
+    logger.debug('Sample log!')
 
 def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     Hoge()
     Huga()
 ```
 
-> 実行のはじめと終わりにログを出力したいメソッドに"@log_decorator()"を指定することでログが出力されるようになります。
+関数の定義文(def文)にデコレートする(上部に`@log_decorator()`を前置する)ことで、デコレートした関数の実行のはじめと終わりにログを出力するようになります。
+
+また関数内部で、取得した`logger`に対してdebug()やwarning()関数を実行することで、任意の場所で任意のメッセージを出力することができます。
 
 実行すると、以下のようになります。
 
 ```bash
-2025-05-14 05:56:05 +0000 (INFO) Hoge            --> Start
-2025-05-14 05:56:05 +0000 (INFO) Hoge            <-- End
-2025-05-14 05:56:05 +0000 (INFO) Huga            --> Start
-2025-05-14 05:56:05 +0000 (INFO) Huga            <-- End
+(tenv) $ python main.py 
+2025-09-08 11:14:29 +0900 (INFO) Hoge            --> Start
+2025-09-08 11:14:29 +0900 (DEBUG) Sample log!
+2025-09-08 11:14:29 +0900 (INFO) Hoge            <-- End
+2025-09-08 11:14:29 +0900 (INFO) Huga            --> Start
+2025-09-08 11:14:29 +0900 (INFO) Huga            <-- End
 ```
 
 同時にログファイル(data/logs/rdeuser.log)にも同じ内容がセットされます。
 
 ```bash
-(tenv) $ cat data/logs/rdeuser.log
-2025-05-14 05:56:05 +0000 (INFO) Hoge            --> Start
-2025-05-14 05:56:05 +0000 (INFO) Hoge            <-- End
-2025-05-14 05:56:05 +0000 (INFO) Huga            --> Start
-2025-05-14 05:56:05 +0000 (INFO) Huga            <-- End
+(tenv) $ cat data/logs/rdeuser.log 
+2025-09-08 11:14:29 +0900 (INFO) Hoge            --> Start
+2025-09-08 11:14:29 +0900 (DEBUG) Sample log!
+2025-09-08 11:14:29 +0900 (INFO) Hoge            <-- End
+2025-09-08 11:14:29 +0900 (INFO) Huga            --> Start
+2025-09-08 11:14:29 +0900 (INFO) Huga            <-- End
 ```
 
 開発が終了し、ログ出力が不要となった場合は、datasets_process.pyの上の方でセットした`get_logger()`の引数として`False`を与えればログ表示、および書き込みがなくなります。
@@ -219,18 +229,21 @@ logger = CustomLog().get_logger(False)
 ```
 
 > get_logger()の引数にFalseを指定するだけです。ロジック内のソースを変更する必要はありません。
+>
+> ログ出力が抑止されるのは、ユーザログ(`data/logs/rdeuser.log`)のみです。システムログ(`data/logs/rdesys.log`)は引き続き出力されます。
 
 ```bash
 (tenv) $ python main.py 
 (tenv) $ 
 ```
 
-> 何も表示されなくなりました。
+> 画面(→標準出力)には、何も表示されなくなりました。
 >
 > なお、ログファイル(→data/logs/rdeuser.log)に追記はされませんが、ファイルのクリア(0バイトのファイルとして更新)や削除は行われません。ファイルのクリアや削除を実施したい場合は、別途処理(`reinit.sh`など)を実施してください。
 
-
-./data/logs/rdeuser.log was cleared!
+```bash
+$ ./reinit.sh 
+./data/logs was removed
 ./data/meta was removed
 ./data/main_image was removed
 ./data/other_image was removed
@@ -239,6 +252,8 @@ logger = CustomLog().get_logger(False)
 ./data/structured was removed
 ./data/temp was removed
 ./data/thumbnail was removed
+./data/attachment was removed
+./data/invoice_patch was removed
 ```
 
 再度構造化処理プログラムを実行し、ログ出力がされていないことを確認します。
@@ -246,11 +261,11 @@ logger = CustomLog().get_logger(False)
 ```bash
 (tenv) $ python main.py 
 
-(tenv) $ ls -l data/logs
+(tenv) $ ls -l data/logs/rdeuser.log
 合計 0
 ```
 
-> ログファイルが存在していないことが確認できます。
+> ログファイルが存在していないことが確認できます。ただしこの場合でも、システムログ(`data/logs/rdesys.log`)は出力されます。
 
 ### それ以外の実装
 
@@ -347,10 +362,12 @@ from modules.StructuredProcessBase import StructuredProcessBase
 logger = CustomLog().get_logger()
 
 class CustomProcess(StructuredProcessBase):
+    additional_title = "(2024)"
+
     @log_decorator()
     def __init__(self, srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath):
         super().__init__(srcpaths, resource_paths)
-        self.invoice_file = srcpaths.invoice.joinpath('invoice.json')
+        self.invoice_file = resource_paths.invoice.joinpath('invoice.json')
         self.data_df = None
         self.const_meta_info = dict()
         self.repeated_meta_info = dict()
@@ -359,8 +376,7 @@ class CustomProcess(StructuredProcessBase):
     @log_decorator()
     def check_input(self) -> bool:
         # Check input file
-        input_dir = self.srcpaths.inputdata
-        input_files = list(input_dir.glob("*"))
+        input_files = self.resource_paths.rawfiles
         if len(input_files) == 0:
             raise StructuredError("ERROR: input data not found")
         if len(input_files) > 1:
@@ -372,7 +388,6 @@ class CustomProcess(StructuredProcessBase):
             )
         return True
 
-
     @log_decorator()
     def parse_input(self) -> None:
         # Read input data
@@ -380,8 +395,7 @@ class CustomProcess(StructuredProcessBase):
         raw_data_df = None
         raw_meta_obj = None
         #
-        input_dir = self.srcpaths.inputdata
-        input_file = input_dir / "sample.data"
+        input_file = self.resource_paths.rawfiles[0]
 
         with open(input_file) as f:
             lines = f.readlines()
@@ -390,7 +404,7 @@ class CustomProcess(StructuredProcessBase):
 
         meta_row = [i for i, line in enumerate(lines_strip) if "[METADATA]" in line]
         data_row = [i for i, line in enumerate(lines_strip) if "[DATA]" in line]
-        if (meta_row != []) & (data_row !=[]):
+        if (meta_row != []) & (data_row != []):
             meta = lines_strip[(meta_row[0]+1):data_row[0]]
             # metadata to dict
             raw_meta_obj = dict(map(lambda x: tuple([x.split(DELIM)[0],
@@ -409,7 +423,6 @@ class CustomProcess(StructuredProcessBase):
             temp_df = pd.read_csv(io.StringIO(csv),header=None)
             temp_df.columns = ["x", series_name]
             raw_data_df.append(temp_df)
-
         #
         self.const_meta_info = self.const_meta_info | raw_meta_obj
         self.data_df = raw_data_df
@@ -443,7 +456,7 @@ class CustomProcess(StructuredProcessBase):
     def _update_invoice(self) -> None:
         # Update invoice title
         original_data_name = self.invoice_dict["basic"]["dataName"]
-        additional_title = "(2024)"
+        additional_title = self.additional_title
         if original_data_name.find(additional_title) < 0:
             # update title if not applied yet
             self.invoice_dict["basic"]["dataName"] = \
@@ -471,9 +484,8 @@ class CustomProcess(StructuredProcessBase):
         # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
         is_private_raw = self.is_private_raw
         raw_dir = self.resource_paths.nonshared_raw if is_private_raw else self.resource_paths.raw
-        input_dir = self.srcpaths.inputdata
-        input_file = input_dir.joinpath("sample.data")
-        shutil.copy(input_file, raw_dir)
+        for input_file in self.resource_paths.rawfiles:
+            shutil.copy(input_file, raw_dir)
 
     @log_decorator()
     def make_meta(self) -> None:
@@ -608,68 +620,69 @@ class CustomProcess(StructuredProcessBase):
 実行してみると、以下の様になります。
 
 ```bash
+(tenv) $ ./reinit.sh
+:
 (tenv) $ python main.py
-2025-05-14 06:16:47 +0000 (INFO) __init__        --> Start
-2025-05-14 06:16:47 +0000 (INFO) __init__        <-- End
-2025-05-14 06:16:47 +0000 (INFO) check_input     --> Start
-2025-05-14 06:16:47 +0000 (INFO) check_input     <-- End
-2025-05-14 06:16:47 +0000 (INFO) parse_invoice   --> Start
-2025-05-14 06:16:47 +0000 (INFO) parse_invoice   <-- End
-2025-05-14 06:16:47 +0000 (INFO) update_invoice  --> Start
-2025-05-14 06:16:47 +0000 (INFO) update_invoice  <-- End
-2025-05-14 06:16:47 +0000 (INFO) parse_input     --> Start
-2025-05-14 06:16:47 +0000 (INFO) parse_input     <-- End
-2025-05-14 06:16:47 +0000 (INFO) make_meta       --> Start
-2025-05-14 06:16:47 +0000 (INFO) make_meta       <-- End
-2025-05-14 06:16:47 +0000 (INFO) make_struct     --> Start
-2025-05-14 06:16:47 +0000 (INFO) make_struct     <-- End
-2025-05-14 06:16:47 +0000 (INFO) make_graph      --> Start
-2025-05-14 06:16:49 +0000 (INFO) make_graph      <-- End
-2025-05-14 06:16:49 +0000 (INFO) make_thumbnail  --> Start
-2025-05-14 06:16:49 +0000 (INFO) make_thumbnail  <-- End
-2025-05-14 06:16:49 +0000 (INFO) copy_raw_files  --> Start
-2025-05-14 06:16:49 +0000 (INFO) copy_raw_files  <-- End
+2025-09-08 11:49:50 +0900 (INFO) __init__        --> Start
+2025-09-08 11:49:50 +0900 (INFO) __init__        <-- End
+2025-09-08 11:49:50 +0900 (INFO) check_input     --> Start
+2025-09-08 11:49:50 +0900 (INFO) check_input     <-- End
+2025-09-08 11:49:50 +0900 (INFO) parse_invoice   --> Start
+2025-09-08 11:49:50 +0900 (INFO) parse_invoice   <-- End
+2025-09-08 11:49:50 +0900 (INFO) update_invoice  --> Start
+2025-09-08 11:49:50 +0900 (INFO) update_invoice  <-- End
+2025-09-08 11:49:50 +0900 (INFO) parse_input     --> Start
+2025-09-08 11:49:50 +0900 (INFO) parse_input     <-- End
+2025-09-08 11:49:50 +0900 (INFO) make_meta       --> Start
+2025-09-08 11:49:50 +0900 (INFO) make_meta       <-- End
+2025-09-08 11:49:50 +0900 (INFO) make_struct     --> Start
+2025-09-08 11:49:50 +0900 (INFO) make_struct     <-- End
+2025-09-08 11:49:50 +0900 (INFO) make_graph      --> Start
+2025-09-08 11:49:50 +0900 (INFO) make_graph      <-- End
+2025-09-08 11:49:50 +0900 (INFO) make_thumbnail  --> Start
+2025-09-08 11:49:50 +0900 (INFO) make_thumbnail  <-- End
+2025-09-08 11:49:50 +0900 (INFO) copy_raw_files  --> Start
+2025-09-08 11:49:50 +0900 (INFO) copy_raw_files  <-- End
 ```
 
 どういったファイルが生成されているかの確認をします。
 
 ```bash
-(tenv) $ tree
-.
-├── Dockerfile
-├── data
-│   ├── attachment
-│   ├── inputdata
-│   │   └── sample.data
-│   ├── invoice
-│   │   └── invoice.json
-│   ├── invoice_patch
-│   ├── logs
-│   │   ├── rdesys.log
-│   │   └── rdeuser.log
-│   ├── main_image
-│   │   └── all_series.png
-│   ├── meta
-│   │   └── metadata.json
-│   ├── nonshared_raw
-│   │   ├── invoice.json.orig
-│   │   └── sample.data
-│   ├── other_image
-│   │   ├── series1.png
-│   │   ├── series2.png
-│   │   └── series3.png
-│   ├── raw
-│   ├── structured
-│   │   ├── series1.csv
-│   │   ├── series2.csv
-│   │   └── series3.csv
-│   ├── tasksupport
-│   │   ├── invoice.schema.json
-│   │   └── metadata-def.json
-│   ├── temp
-│   └── thumbnail
-│       └── thumbnail.png
-：
+(tenv) $ tree data
+data
+├── attachment
+├── inputdata
+│   └── sample.data
+├── invoice
+│   └── invoice.json
+├── invoice_patch
+├── logs
+│   ├── rdesys.log
+│   └── rdeuser.log
+├── main_image
+│   └── all_series.png
+├── meta
+│   └── metadata.json
+├── nonshared_raw
+│   ├── invoice.json.orig
+│   └── sample.data
+├── other_image
+│   ├── series1.png
+│   ├── series2.png
+│   └── series3.png
+├── raw
+├── structured
+│   ├── series1.csv
+│   ├── series2.csv
+│   └── series3.csv
+├── tasksupport
+│   ├── invoice.schema.json
+│   └── metadata-def.json
+├── temp
+└── thumbnail
+    └── thumbnail.png
+
+15 directories, 17 files
 ```
 
 > 初級編、応用編1と同じ結果となっています。
@@ -742,31 +755,16 @@ data/invoice/invoice.json
 modules/custom_process2.py
 
 ```python
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
-from rdetoolkit.invoicefile import InvoiceFile
-from rdetoolkit.rdelogger import CustomLog, log_decorator
-
 from modules.custom_process import CustomProcess
 
 
-logger = CustomLog().get_logger()
-
 class CustomProcess2(CustomProcess):
-    @log_decorator()
-    def __init__(self, srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath):
-        super().__init__(srcpaths, resource_paths)
-
-    def _update_invoice(self) -> None:
-        # Update invoice title
-        original_data_name = self.invoice_dict["basic"]["dataName"]
-        additional_title = "(2025)"
-        if original_data_name.find(additional_title) < 0:
-            # update title if not applied yet
-            self.invoice_dict["basic"]["dataName"] = \
-                original_data_name + " / " + additional_title
+    additional_title = "(2025)"
 ```
 
-> CustomProcessを継承しているため、CustomProcessクラスからの変更点のみの記述となっていることに注意してください。つまり、CustomProcessから変更のない処理についての記述は不要です。
+> CustomProcessを継承しているため、CustomProcessクラスからの変更点のみの記述となっていることに注意してください。つまり、CustomProcessから変更のない処理についての記述は不要です。今回の例では、追加するテキストが変更になる("(2024)" → "(2025)")だけですのでクラス変数部分の指定だけで済みます。
+>
+> もちろん他の方法での実装(初期化時の引数として、`additional_title`の内容を指定する、など)もあります。上記は1つの実装例として考えてください。
 
 #### datasets_process.py
 
@@ -786,11 +784,11 @@ from modules.custom_process2 import CustomProcess2
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
 def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     # Parse invoice
-    invoice_file = srcpaths.invoice.joinpath("invoice.json")
-    invoice = InvoiceFile(invoice_file)
+    invoice_file = resource_paths.invoice.joinpath("invoice.json")
+    invoice = InvoiceFile(invoice_file).invoice_obj
 
     ## Create Instance of Custom Process
-    if invoice.invoice_obj["custom"]["data_type"] == 'variant':
+    if invoice["custom"]["data_type"] == 'variant':
         custom_process = CustomProcess2(srcpaths, resource_paths)
     else:
         custom_process = CustomProcess(srcpaths, resource_paths)
@@ -808,11 +806,13 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
     custom_process.copy_raw_files()
 ```
 
-> invoiceインスタンスを作成の後、"Create Instance ……"部分を変更します。同時にCustomProcess2のimportを忘れずに追加してください。
+> invoiceインスタンスを作成の後、"Create Instance ……"部分を`invoiceで指定された値に応じて処理を変更する`ように変更します。同時にCustomProcess2のimportを忘れずに追加してください。
 
 #### 実行確認
 
 "data_type"が"variant"であることを確認し、実行します。
+
+実行前に、invoice.jsonの内容を確認します。、
 
 ```bash
 (tenv) $ grep data_type data/invoice/invoice.json
