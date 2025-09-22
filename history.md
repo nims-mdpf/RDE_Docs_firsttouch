@@ -3,6 +3,7 @@
 ## 2025/09/22
 - RDEToolKit(invoiceモード)を利用したシンプルなRDEデータ構造化処理プログラムハンズオン(doc3)更新
   - RDEToolKit v1.3.4対応など
+- doc2 RDEデータ構造化とデータセットテンプレート解説の更新
 
 ## 2025/07/24
 - 各ドキュメントのmarkdown形式のソースをdocumentsに配置
