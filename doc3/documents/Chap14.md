@@ -328,7 +328,7 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
     custom_module(srcpaths, resource_paths)
 ```
 
-#### "from __future__ import annotations"について
+#### "`from __future__ import annotations`"について
 
 上記で示したスクリプトの1行目には、"`from __future__ import annotations`"の記述があります。
 
@@ -429,7 +429,7 @@ RDEToolKitでは、生データ( data/inputdata/* )は、何も指定しない�
 
 自動コピーの停止は、`"main.py"の中で設定する`方法と、`設定ファイルを使って設定する`方法の2つから選択できます。
 
-main.pyの中で設定する方法は初級編内でやりましたので、応用編では、"設定ファイル"を置くことで同様の設定を行います。
+main.pyの中で設定する方法は初級編内で実施しましたので、応用編では、"設定ファイル"を置くことで同様の設定を行います。
 
 以下の内容で、ファイルを作成します。
 
