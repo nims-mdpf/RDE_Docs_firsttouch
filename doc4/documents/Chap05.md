@@ -8,7 +8,7 @@
 * 1つのデータタイルに登録されるファイルは、1個でも複数でも構わない。ただし、複数個の場合は、zip圧縮して1つのファイルにしておく必要がある。
 * 構造化処理は、通常の"インボイスモード"の場合と同様に実装される。
 * 1つのデータタイルに登録される送り状データは、Excelファイルの1行に記述される。
-* 画面から入力された送り状データ(invoice.json)は、一部を除き**利用されない**。
+* 画面から入力された送り状データ(invoice.json)は、Excelファイルの内容で**上書き**される。Excelファイル内で指定がない(空欄の)項目は画面入力値が利用される。
 
 ## エクセルインボイスモード利用時の開発概要
 
@@ -122,7 +122,7 @@ chmod a+x reinit.sh
 ```bash
 (venv) $ ls -l data/inputdata/
 total 0
--rw-r--r-- 1 devel devel 0  5月 16 07:55 sample-data.txt
+-rw-r--r-- 1 devel devel 0  9月 29 09:55 sample-data.txt
 ```
 
 > 上記サンプルデータは"0バイト"のファイルです。この例ではファイルの読み込み処理を行わないダミー実装のためです。`nonshared_raw/`フォルダへのコピーのみ実行されます。
@@ -187,6 +187,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 ├── meta
 ├── nonshared_raw
@@ -200,7 +201,7 @@ data
 ├── temp
 └── thumbnail
 
-15 directories, 5 files
+15 directories, 6 files
 ```
 
 `sample-data.txt`が、想定通り`nonshared_raw/`フォルダにコピーされていることが確認できます。
@@ -229,35 +230,11 @@ data/invoice/invoice.json
         "description": "test_today"
     },
     "custom": {
-        "common_data_origin": "experiments",
-        "common_technical_category": "measurement",
-        "measurement_method_category": "散乱_回折",
-        "measurement_method_sub_category": "X線回折",
-        "measurement_analysis_field": null,
-        "measurement_measurement_environment": null,
-        "measurement_energy_level_transition_structure_etc_of_interst": null,
-        "measurement_measured_date": "2017-11-21",
-        "measurement_standardized_procedure": null,
-        "measurement_instrumentation_site": null,
-        "measurement_reference": null,
-        "measurement_temperature": null,
-        "sample_holder_name": null,
+        "key1": "test1",
         "key2": "test2",
         "key3": "test3",
         "key4": "test4",
-        "key5": "test5",
-        "key6": "test6",
-        "key7": "test7",
-        "key8": "test8",
-        "key9": "test9",
-        "key10": "test10",
-        "flood_gun_voltage": 1,
-        "flood_gun_emission_current": 0,
-        "ion_gun_voltage": 0,
-        "analysis_field": "test_myfield",
-        "sample_position": "test_#1",
-        "sample_condition": "test_condition",
-        "no3dimage": 0
+        "key5": "test5"
     },
     "sample": {
         "sampleId": "8ea50153-7a87-44b7-9d6e-10179c507039",
@@ -344,84 +321,6 @@ data/tasksupport/invoice.schema.json
           },
           "required": [],
           "properties": {
-              "date": {
-                  "label": {
-                      "ja": "日付",
-                      "en": "Date"
-                  },
-                  "type": "string"
-              },
-              "substrate": {
-                  "label": {
-                      "ja": "基板",
-                      "en": "Substrate"
-                  },
-                  "type": "string"
-              },
-              "target": {
-                  "label": {
-                      "ja": "層構造",
-                      "en": "Target"
-                  },
-                  "type": "string"
-              },
-              "tg": {
-                  "label": {
-                      "ja": "成膜温度",
-                      "en": "Tg"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "C"
-                  }
-              },
-              "po2": {
-                  "label": {
-                      "ja": "成膜酸素圧",
-                      "en": "PO2"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "Torr"
-                  }
-              },
-              "laser_fluence": {
-                  "label": {
-                      "ja": "レーザー強度",
-                      "en": "Laser fluence"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "mJ/pulse"
-                  }
-              },
-              "spot_size": {
-                  "label": {
-                      "ja": "レーザースポットサイズ",
-                      "en": "Spot Size"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "mm^2"
-                  }
-              },
-              "frequency": {
-                  "label": {
-                      "ja": "レーザー周波数",
-                      "en": "Frequency"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "Hz"
-                  }
-              },
-              "pulse_count": {
-                  "label": {
-                      "ja": "成膜パルス数",
-                      "en": "Pulse Count"
-                  },
-                  "type": "string"
-              },
               "key1": {
                   "label": {
                       "ja": "キー1",
@@ -454,93 +353,6 @@ data/tasksupport/invoice.schema.json
                   "label": {
                       "ja": "キー5",
                       "en": "key5"
-                  },
-                  "type": "string"
-              },
-              "common_data_type": {
-                  "label": {
-                      "ja": "登録データタイプ",
-                      "en": "Data Type"
-                  },
-                  "type": "string",
-                  "default": "ELN"
-              },
-              "common_data_origin": {
-                  "label": {
-                      "ja": "データの起源",
-                      "en": "Data Origin"
-                  },
-                  "type": "string",
-                  "default": "experiments"
-              },
-              "common_technical_category": {
-                  "label": {
-                      "ja": "技術カテゴリー",
-                      "en": "Technical Category"
-                  },
-                  "type": "string",
-                  "default": "process"
-              },
-              "common_reference": {
-                  "label": {
-                      "ja": "参考文献",
-                      "en": "Reference"
-                  },
-                  "type": "string"
-              },
-              "process_processed_date": {
-                  "label": {
-                      "ja": "処理年月日",
-                      "en": "Processed date"
-                  },
-                  "type": "string",
-                  "format": "date"
-              },
-              "process_process_category": {
-                  "label": {
-                      "ja": "プロセスカテゴリー",
-                      "en": "Process category"
-                  },
-                  "type": "string",
-                  "default": "蒸着_成膜"
-              },
-              "process_process_technique": {
-                  "label": {
-                      "ja": "プロセス手法",
-                      "en": "Process technique"
-                  },
-                  "type": "string",
-                  "default": "パルスレーザ堆積"
-              },
-              "process_processing_environment": {
-                  "label": {
-                      "ja": "処理環境",
-                      "en": "Processing environment"
-                  },
-                  "type": "string",
-                  "default": "真空中"
-              },
-              "process_key_temperature": {
-                  "label": {
-                      "ja": "主となる処理温度",
-                      "en": "Key temperature"
-                  },
-                  "type": "number",
-                  "options": {
-                      "unit": "C"
-                  }
-              },
-              "process_instrumentation_site": {
-                  "label": {
-                      "ja": "装置設置場所",
-                      "en": "Instrumentation site"
-                  },
-                  "type": "string"
-              },
-              "process_standardized_procedure": {
-                  "label": {
-                      "ja": "標準手順",
-                      "en": "Standardized procedure"
                   },
                   "type": "string"
               }
@@ -687,7 +499,7 @@ data/tasksupport/metadata-def.json
 }
 ```
 
-> "file_size"を繰り返し有りメタデータ項目として定義しています。入力ファイルは1つですので本来は通常のメタデータ項目ですが、ここでは例を示す意味で"繰り返し有り"としています。繰り返しのないメタデータ項目として扱う場合は"variable: 1"の行を削除します。
+> "file_size"を繰り返し有りメタデータ項目( → "variable":1)として定義しています。入力ファイルは1つですので本来は通常のメタデータ項目ですが、ここでは例を示す意味で"繰り返し有り"としています。繰り返しのないメタデータ項目として扱う場合は"variable: 1"の行を削除します。
 
 続いて、構造化処理を実行するようにプログラムを作成していきます。
 
@@ -944,6 +756,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 ├── meta
 │   └── metadata.json
@@ -959,7 +772,7 @@ data
 ├── temp
 └── thumbnail
 
-15 directories, 7 files
+15 directories, 8 files
 ```
 
 ## エクセルインボイスモードの開発
@@ -1013,7 +826,7 @@ cp data/invoice/invoice.json data/invoice/invoice.json.orig
   adding: data0002.dat (stored 0%)
 
 (venv) $ ls -l data.zip
--rw-rw-r-- 1 devel devel 493  5月 16 08:13 data.zip
+-rw-rw-r-- 1 devel devel 493  9月 29 10:13 data.zip
 ```
 
 > zipコマンドがない場合は、`sudo apt install zip`にてインストールしてから作業してください。
@@ -1029,7 +842,7 @@ cp data.zip data/inputdata/
 ```bash
 (venv) $ ls -l data/inputdata/
 total 4
--rw-rw-r-- 1 devel devel 493  5月 16 08:13 data.zip
+-rw-rw-r-- 1 devel devel 493  9月 29 10:13 data.zip
 ```
 
 構造化処理プログラムが、`インボイスモード`か`エクセルインボイスモード`かのいずで実行されるかを判断するポイントは、`data/inputdata`フォルダに、ファイル名の末尾が`_excel_invoice.xlsx`となっているExcelファイルが存在するかどうか、です。当該ファイルが存在すればエクセルインボイスモードとして稼働しますし、存在しなければ通常のインボイスモードとして稼働します。
@@ -1074,7 +887,7 @@ zipファイルを展開した時に、ファイル1つ1つを別々のデータ
 ```bash
 (venv) $ ls -l data/inputdata/
 :
--rwxrwxr-x 1 devel devel 94720  2月  3 17:54 sample_excel_invoice.xls
+-rwxrwxr-x 1 devel devel 94720  9月  3 17:54 sample_excel_invoice.xls
 
 (venv) $ python main.py
 ：
@@ -1092,7 +905,7 @@ Error: Missing optional dependency 'xlrd'. Install xlrd >= 2.0.1 for xls Excel s
 
 しかし、構造化処理プログラムからは、当該Excelファイルが`単なる入力ファイルの1つ`として扱われます。つまり、`エクセルインボイスモード`ではなく、通常の`インボイスモード`での登録となります。
 
-また、ファイル名の末尾が`_excel_invoice.xlsx`(拡張子を含む)のExcelファイルは、`data/inputdata/`フォルダに1個だけである必要があります。当該条件を満たすExcelファイルが2件(以上)ある場合は、以下のようなエラーとなります。
+また、ファイル名の末尾が`_excel_invoice.xlsx`(拡張子を含む)のExcelファイルは、`data/inputdata/`フォルダに1個だけである必要があります。当該条件を満たすExcelファイルが2個(以上)ある場合は、以下のようなエラーとなります。
 
 ```bash
 (venv) $ ls -l data/inputdata/
@@ -1160,7 +973,7 @@ RDEToolKitには、エクセルインボイスモードで使用するExcelフ�
 
 > 前述の様にシート名は任意です。ここでは変更せずにそのまま利用することにします。
 
-A1セル(シートの左上端)の値が`invoiceList_format_id`であるのを確認します。
+A1セル(シートの左上端)の値が`invoiceList_format_id`であることを確認します。
 
 > そうなっているはずなので、確認だけでOKです。
 
@@ -1170,7 +983,7 @@ A1セル(シートの左上端)の値が`invoiceList_format_id`であるのを�
 
 "フォルダモード"を使う場合は、`data_folder`に変更してください。
 
-#### 2行目(A2を除く)、3行目
+#### 2行目(A2セルを除く)および3行目
 
 インボイスの項目名が入りますので、基本的に**変更しない**でください。
 
@@ -1187,9 +1000,13 @@ A1セル(シートの左上端)の値が`invoiceList_format_id`であるのを�
 
 送り状データを、1行ずつ書いていきます。
 
-* 4行目の日本語項目名に`(必須)`と書かれた項目は、必ず入力してください。入力が漏れていた場合は、構造化処理プログラム実行時にエラーになります。
+* 4行目の日本語項目名に`(必須)`と書かれた項目は、一部の例外を除き必ず入力してください。入力が漏れていた場合は、構造化処理プログラム実行時にエラーになる場合があります。
 
-テストデータとして、以下をいれます。
+> 一部の必須項目は、管理上必須としているものもあります。例えば`データセット名`が空欄だと、あとで当該Excelファイルを見た場合に、どのデータセット向けのExcelインボイスファイルかが判別できなくなる可能性があります。そのため、データセット名は必須と表記されています。
+>
+> また状況に応じて必須となるものに"(必須)"と表記されている場合もあります。例えば"試料UUID(必須)"とある場合は、`既存試料と紐付ける場合は入力必須`ということであり、試料新規作成の場合は、当該セルは空欄でもエラーとなりません。こういった項目の場合は、必須と明記されていても空欄で問題ありません。
+
+テストデータとして、それぞれのセルに以下を入力します。
 
 > サンプル値ですので、変更して入力しても構いません。サンプルですので、多くの列で、まったく意味がないデータとなっています。
 >
@@ -1198,10 +1015,10 @@ A1セル(シートの左上端)の値が`invoiceList_format_id`であるのを�
 | 列名 | 列番号 | 入力値 | 備考 |
 | ---- | ---- | ---- | ---- |
 | ファイル名 (拡張子も含め入力) | A列 | data0000.dat、data0001.dat、data0002.dat | 展開後のファイル名を拡張子込みでセット |
-| データセット名 | B列 | Dummy | 必須だが、ダミーでよい (本当?) |
+| データセット名 | B列 | Dummy | 必須だが、ダミーでよい |
 | データ所有者 | C列 | (空欄) | |
 | NIMS user UUID | D列 | 97e05f8b9ed6b4b5dd6fd50411a9c163a2d4e38d6264623666383669 | 全部同じでよい |
-| データ名 | E列 | data0000.dat、data0001.dat、data0002.dat | A列と同値 |
+| データ名 | E列 | データ0、 データ1、データ2 | |
 | 実験ID | F列 | (空欄) | |
 | 説明 | G列 | (空欄) | |
 | 試料名(ローカルID) | H列 | Inu、Neko、(空欄) | 7行目だけ空欄にします。 |
@@ -1217,31 +1034,13 @@ A1セル(シートの左上端)の値が`invoiceList_format_id`であるのを�
 | 試料購入日 | R列 | (空欄) | |
 | 購入元 | S列 | A6、B6、C6 | |
 | ロット番号、製造番号など | T列 | A7、B7、C7 | |
-| 日付 | U列 | (空欄) | |
-| 基板 | V列 | (空欄) | |
-| 層構造 | W列 | (空欄) | |
-| 成膜温度 | X列 | (空欄) | |
-| 成膜酸素圧 | Y列 | (空欄) | |
-| レーザー強度 | Z列 | (空欄) | |
-| レーザースポットサイズ | AA列 | (空欄) | |
-| レーザー周波数 | AB列 | (空欄) | |
-| 成膜パルス数 | AC列 | (空欄) | |
-| キー1 | AD列 | あ1、あ2、あ3 | |
-| キー2 | AE列 | い1、い2、い3 | |
-| キー3 | AF列 | う1、う2、う3 | |
-| キー4 | AG列 | え1、え2、え3 | |
-| キー5 | AH列 | お1、お2、お3 | |
-| 登録データタイプ | AI列 | (空欄) | |
-| データの起源 | AJ列 | (空欄) | |
-| 技術カテゴリー | AK列 | (空欄) | |
-| 参考文献 | AL列 | (空欄) | |
-| 処理年月日 | AM列 | (空欄) | |
-| プロセスカテゴリー | AN列 | (空欄) | |
-| プロセス手法 | AO列 | (空欄) | |
-| 処理環境 | AP列 | (空欄) | |
-| 主となる処理温度 | AQ列 | (空欄) | |
-| 装置設置場所 | AR列 | (空欄) | |
-| 標準手順 | AS列 | (空欄) | |
+| キー1 | U列 | あ1、あ2、あ3 | |
+| キー2 | V列 | い1、い2、い3 | |
+| キー3 | W列 | う1、う2、う3 | |
+| キー4 | X列 | え1、え2、え3 | |
+| キー5 | Y列 | お1、お2、お3 | |
+
+> 前述の様に、データセット名は管理上必要な項目なので開発時点では"Dummy"等意味の無い値でも問題ありません。実際の登録に用いるExcelファイルにおいては、どのデータセット向けのExcelインボイスファイルかがわかるように`データセット名`を正しくセットしてください。
 
 ### その他の注意点
 
@@ -1264,13 +1063,13 @@ ErrorMessage=Error! Blank lines exist between lines
 ```bash
 (venv) $ tree data/inputdata/
 data/inputdata/
-├── Template_excel_invoice.xlsx
+├── template_excel_invoice.xlsx
 └── data.zip
 
 1 directory, 2 files
 ```
 
-> 転送の仕方により、ファイル名の1文字目が大文字に変更される場合があります。
+> 上記例では、ひな形作成時のファイル名のまま利用していますが、運用時は適切にファイル名を変更してください。
 
 続いて、(通常の)インボイスモードでの実行結果をクリアします。
 
@@ -1326,13 +1125,14 @@ data
 │       ├── temp
 │       └── thumbnail
 ├── inputdata
-│   ├── Template_excel_invoice.xlsx
+│   ├── template_excel_invoice.xlsx
 │   └── data.zip
 ├── invoice
 │   ├── invoice.json
 │   └── invoice.json.orig
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 ├── meta
 │   └── metadata.json
@@ -1352,7 +1152,7 @@ data
 │   └── invoice_org.json
 └── thumbnail
 
-42 directories, 21 files
+42 directories, 22 files
 ```
 
 前述のように、構造化処理プログラムは修正不要です。`data/inputdata`フォルダ上に、単独の入力ファイルを置くのではなく、zip圧縮された入力ファイルとExcelインボイスファイル(xlsxファイル)を配置するだけで、通常のインボイスモードがエクセルインボイスモードに変わります。

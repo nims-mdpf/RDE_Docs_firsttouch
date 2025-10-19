@@ -104,7 +104,7 @@ $ source ~/venv/bin/activate
 ```bash
 (venv) $ ls -l data/inputdata/
 total 372
--rwxr-xr-x 1 devel devel 377909  1月 31 10:50 structured.zip
+-rwxr-xr-x 1 devel devel 377909  9月 17 16:50 structured.zip
 ```
 
 ### フォルダ初期化
@@ -170,6 +170,25 @@ rm -rf modules/__pycache__
 chmod a+x reinit.sh
 ```
 
+一度実行して問題がないことを確認します。
+
+```bash
+(venv) $ ./reinit.sh 
+./data/devided was removed
+./data/logs was removed
+./data/divided was removed
+./data/attachment was removed
+./data/invoice_patch was removed
+./data/meta was removed
+./data/main_image was removed
+./data/other_image was removed
+./data/raw was removed
+./data/nonshared_raw was removed
+./data/structured was removed
+./data/temp was removed
+./data/thumbnail was removed
+```
+
 ### 構造化処理作成
 
 ここから、実際に構造化処理プログラムを作成していきます。
@@ -183,7 +202,7 @@ chmod a+x reinit.sh
 1. RDEFormatモードを使用するように"設定"を追加
 2. 同時にデフォルトではthumbnailフォルダへの画像ファイルコピーが実行されないので、実行するように設定を追加
 
-> 別述のように、これらの設定内容は、main.py内に記述する方法の他、tasksupportフォルダにrdeconfig.ymlファイルを配置することでも実現できます。その方法を使う場合は、main.pyを変更する必要はありません。
+> 別述のように、これらの設定内容は、main.py内に記述する方法の他、tasksupportフォルダにrdeconfig.ymlファイルを配置することでも実現できます。その方法を使う場合は、main.pyを変更する必要はありません。本章では、main.pyに記述する場合の例を示します。
 
 main.py
 
@@ -232,8 +251,6 @@ data
 4 directories, 4 files
 ```
 
-> RDEToolKitのバージョンによっては、上記の他、`data/logs/`フォルダおよび`data/logs/rdesys.log`ファイルが存在している場合もあります。
-
 実行します。
 
 ```bash
@@ -252,6 +269,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 │   └── gbp_rank2_numPeak2_shirley_mSG1504_result.png
 ├── meta
@@ -291,7 +309,7 @@ data
 └── thumbnail
     └── gbp_rank2_numPeak2_shirley_mSG1504_result.png
 
-21 directories, 25 files
+21 directories, 26 files
 ```
 
 > tempフォルダは、invoice_org.jsonを除き、zipファイルを展開したフォルダ/ファイルが展開されています。このフォルダは、RDE取り込み処理では無視され、取り込み対象とはならないことに注意してください。
@@ -411,6 +429,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 │   └── gbp_rank1_numPeak2_shirley_mSG0672_result.png
 ├── meta
@@ -469,7 +488,7 @@ data
 └── thumbnail
     └── gbp_rank1_numPeak2_shirley_mSG0672_result.png
 
-44 directories, 46 files
+44 directories, 47 files
 ```
 
 > tempフォルダは、invoice_org.jsonを除き、zipファイルを展開したフォルダ/ファイルが展開されています。このフォルダは、RDE取り込み処理では無視され、取り込み対象とはならないことに注意してください。

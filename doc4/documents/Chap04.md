@@ -50,6 +50,8 @@ total 2720
 -rw-rw-r-- 1 devel devel 1475968  5月 16 07:11 report.pdf
 ```
 
+> 日付については、上記と異なる可能性があります。違っていても特に問題ありません。
+
 ### フォルダ初期化
 
 前章同様、以下の内容で初期化用スクリプトを作成します。
@@ -207,12 +209,13 @@ data/invoice/invoice.jsonを以下の内容で作成します。
 
 初期化にて作成されたmain.pyに以下を加えていきます。
 
-1. "multidatatile"モードを使う指定
+1. "MultiDataTile"モードを使う指定
 2. "modules/datasets_process.py"にある`dataset()`関数を実行する。
 
 > 詳細な処理については、この`dataset()`関数から呼び出される関数にて実行することを想定します。
 
 main.py
+
 ```python
 import rdetoolkit
 from rdetoolkit.config import Config, SystemSettings, MultiDataTileSettings
@@ -222,7 +225,7 @@ from modules.datasets_process import dataset
 def main() -> None:
     config = Config(
         system=SystemSettings(
-            extended_mode="multidatatile",
+            extended_mode="MultiDataTile",
         ),
         multidata_tile=MultiDataTileSettings(
             ignore_errors=True
@@ -291,27 +294,27 @@ from pprint import pprint
 実行してみます。
 
 ```bash
-(venv) $ python main.py
+(venv) $ python main.py 
 Hello RDE!
 RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
                  invoice=PosixPath('data/invoice'),
                  tasksupport=PosixPath('data/tasksupport'),
-                 config=Config(system=SystemSettings(extended_mode='multidatatile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True)))
+                 config=Config(system=SystemSettings(extended_mode='MultiDataTile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True), smarttable=None))
 Hello RDE!
 RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
                  invoice=PosixPath('data/invoice'),
                  tasksupport=PosixPath('data/tasksupport'),
-                 config=Config(system=SystemSettings(extended_mode='multidatatile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True)))
+                 config=Config(system=SystemSettings(extended_mode='MultiDataTile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True), smarttable=None))
 Hello RDE!
 RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
                  invoice=PosixPath('data/invoice'),
                  tasksupport=PosixPath('data/tasksupport'),
-                 config=Config(system=SystemSettings(extended_mode='multidatatile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True)))
+                 config=Config(system=SystemSettings(extended_mode='MultiDataTile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True), smarttable=None))
 Hello RDE!
 RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
                  invoice=PosixPath('data/invoice'),
                  tasksupport=PosixPath('data/tasksupport'),
-                 config=Config(system=SystemSettings(extended_mode='multidatatile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True)))
+                 config=Config(system=SystemSettings(extended_mode='MultiDataTile', save_raw=False, save_nonshared_raw=True, save_thumbnail_image=False, magic_variable=False), multidata_tile=MultiDataTileSettings(ignore_errors=True), smarttable=None))
 ```
 
 同じものが4回出力されました。
@@ -329,7 +332,7 @@ RdeInputDirPaths(inputdata=PosixPath('data/inputdata'),
 実行してみます。
 
 ```bash
-(venv) $ python main.py
+(venv) $ python main.py 
 Hello RDE!
 RdeOutputResourcePath(raw=PosixPath('data/raw'),
                       nonshared_raw=PosixPath('data/nonshared_raw'),
@@ -402,6 +405,7 @@ resource_pathsには、出力されるフォルダや出力されるファイル
 
 ```python
 ：
+    #pprint(resource_paths)  #この行はコメントアウト
     pprint(resource_paths.rawfiles)
 ：
 ```
@@ -421,6 +425,8 @@ Hello RDE!
 ```
 
 そうです、"Hello RDE!"が4回表示されたのは、入力ファイル、つまり`data/inputdata/`フォルダ内に存在するファイルが4つ有り、そのそれぞれに対して構造化処理プログラムが実行されるため、なのです。
+
+> `resource_paths.rawfiles`は、上記の様に入力ファイルが1個の場合でも配列として提供されます。構造化処理プログラム内で利用する場合は注意してください。
 
 この"単純な"プログラムの結果どうなったかを確認してみます。
 
@@ -483,6 +489,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 ├── meta
 ├── nonshared_raw
@@ -497,7 +504,7 @@ data
 │   └── invoice_org.json
 └── thumbnail
 
-55 directories, 15 files
+55 directories, 16 files
 ```
 
 `data/inputdata/`フォルダには、先に用意した4つのファイルがあることが分かります。
@@ -511,7 +518,7 @@ data
 │   └── report.pdf
 ```
 
-主な出力先の1つである"nonsahred_raw/"フォルダについて確認すると
+主な出力先の1つである"nonshared_raw/"フォルダについて確認すると
 * data/nonshared_raw
 
 の他に
@@ -528,7 +535,7 @@ data
 
 ## イメージ処理
 
-上述のように、入力ファイルはtif形式、bmp形式、svg形式およびpdf形式とそれぞれ異なっています。
+上述のように、この例で使われる入力ファイルはtif形式、bmp形式、svg形式およびpdf形式とそれぞれ異なっています。
 
 tif形式(= tiff形式)やbmp形式(BitMap形式)、jpg形式(=JPEG形式)などの画像イメージは問題なくRDE内で利用可能である一方、SVG形式では、そのまま画像用のフォルダ(`main_image/`あるいは`other_image/`)に格納した場合、格納は可能であっても、登録されたデータのダウンロードに支障が発生してしまいます。
 
@@ -544,11 +551,11 @@ tif形式(= tiff形式)やbmp形式(BitMap形式)、jpg形式(=JPEG形式)など
 
 入力ファイルの形式を判断するために、python-magic モジュールを利用します。
 
-> 同様のモジュールとして、Python標準モジュールのmimetypesがあります。mimetypesは、ファイル名拡張子によって形式を返します。つまりファイル名に拡張子が付いていないファイルについて、その形式が判断できないません。そのため、ここではpython-magicモジュールを使うことにします。
+> 同様のモジュールとして、Python標準モジュールのmimetypesがあります。mimetypesは、ファイル名拡張子によって形式を返します。つまりファイル名に拡張子が付いていないファイルについて、その形式が判断できません。そのため、ここではpython-magicモジュールを使うことにします。
 
 python-magicモジュールの実行には、libmagicが必要となります。
 
-テストしたUbuntu 24.04の場合、以下のパッケージがインストールされていました。
+インストール状況を確認します。テストしたUbuntu 24.04の場合、以下のようになります。
 
 ```bash
 (venv) $ sudo apt list --installed | grep libmagic*
@@ -557,13 +564,30 @@ libmagic-mgc/noble,now 1:5.45-3build1 amd64 [インストール済み、自動]
 libmagic1t64/noble,now 1:5.45-3build1 amd64 [インストール済み、自動]
 ```
 
-続いて、`python-magic`をインストールします。
+つまり、libmagicパッケージが既にインストールされた状態でした。インストールされていることが確認できない場合は、それぞれの環境に合わせてlibmagic(または相当する)パッケージをインストールしてください。
+
+続いて、Pythonの`python-magic`モジュールをインストールします。
 
 ```bash
 pip install python-magic
 ```
 
-スクリプト(modules/datasets_process.py)の先頭で、magicをインポートします。
+確認します。
+
+```bash
+(venv) $ pip list
+Package                   Version
+------------------------- -----------------
+:
+python-magic              0.4.27
+:
+```
+
+> 上記のように`python-magic`が表示されればインストールされていることが確認できます。
+
+スクリプト(modules/datasets_process.py)の先頭で、`magic`をインポートします。
+
+> パッケージ名は`python-magic`ですが、importする際は`magic`だけとなります。
 
 modules/datasets_process.py
 
@@ -606,7 +630,7 @@ PosixPath('data/divided/0003/main_image')
 * data/divided/0002/main_image
 * data/divided/0003/main_image
 
-> 2個目以降のフォルダ名を都度割り出すのは大変なので、上の様にRDEToolKitが提供している機能を利用します。
+> 2個目以降のフォルダ名を構造化処理プログラム内で都度生成するのは大変なので、上の様にRDEToolKitが提供している機能を利用します。
 
 次に、それぞれのファイル名を取得し、python-magicモジュールによる判定を行います。
 
@@ -648,6 +672,8 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 
 変換操作など実行せずに、main_imageフォルダにコピーする。コピーにはshutilパッケージを利用します。
 
+modules/datasets_process.py
+
 ```python
 import shutil
 ：
@@ -671,6 +697,8 @@ pip install PyMuPDF
 ```
 
 インポートします。このモジュールは、インストール時に指定するパッケージ名とインポートする名称が大きく異なります(→ "fitz")ので注意してください。またpdfファイル名から拡張子を取り除き、新たな拡張子(.png)を付けて保存するため、pathlibもインポートしておきます。
+
+modules/datasets_process.py
 
 ```python
 from pathlib import Path
@@ -719,15 +747,20 @@ sudo apt install libcairo2
 ```
 
 インポートします。
+
+modules/datasets_process.py
+
 ```python
 import os
 import cairosvg
 ：
 ```
 
-> osパッケージのインポートは、Pythonスクリプト内で`環境変数`を設定するために必要となります。
+> 前者、つまりosパッケージのインポートは、Pythonスクリプト内で`環境変数`を設定するために必要となります。
 
 変換処理は、上のif文に続く形とします。
+
+modules/datasets_process.py
 
 ```python
 ：
@@ -738,7 +771,7 @@ import cairosvg
             cairosvg.svg2png(url=str(inputfile),write_to=str(image_to / image_f_name))
 ```
 
-> $LC_CTYPEの設定は必須ではありませんが、英語環境で日本語文字列を含むsvg形式のファイルを変換する際には文字化けを避けるために設定します。
+> プログラム中で環境変数`$LC_CTYPE`の設定を行っています。この設定は必須ではありませんが、英語環境で日本語文字列を含むsvg形式のファイルを変換する際には文字化けを避けるために設定します。
 
 #### その他の画像形式の場合 (tif形式、bmp形式を含む)
 
@@ -747,6 +780,8 @@ import cairosvg
 変換処理は、上のif文に続く形とします。
 
 ```python
+:
+from PIL import Image
 ：
         else:
             try:
@@ -772,6 +807,7 @@ from pathlib import Path
 
 import fitz
 import cairosvg
+from PIL import Image
 from rdetoolkit.errors import catch_exception_with_message
 from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
 
@@ -832,6 +868,7 @@ data
 │   │   ├── invoice_patch
 │   │   ├── logs
 │   │   ├── main_image
+│   │   │   └── f27.png
 │   │   ├── meta
 │   │   ├── nonshared_raw
 │   │   │   └── f27.bmp
@@ -881,7 +918,9 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
+│   └── Mo50Ti15C-20230111-10mN-00.png
 ├── meta
 ├── nonshared_raw
 │   └── Mo50Ti15C-20230111-10mN-00.tif
@@ -895,14 +934,14 @@ data
 │   └── invoice_org.json
 └── thumbnail
 
-55 directories, 17 files
+55 directories, 20 files
 ```
 
-> tiff形式、png形式はそのまま`nonshared_raw/`フォルダに格納されます。svg形式、pdf形式の場合は、変換しpng形式の画像が生成され、`main_image/`フォルダに格納されます。
+> `inputdata/`フォルダにある、tiff形式、bmp形式、svg形式およびpdf形式ファイルは、それぞれpng画像に変換され、`main_image/`フォルダに格納されます。本章の例としては扱っていませんがjpeg形式、gif形式およびpng形式は(変換などの作業を行わず)そのまま`main_image/`フォルダに複製が格納されます。
 
-## 非共有フォルダ格納
+## 非共有フォルダ格納と共有フォルダへの格納
 
-RDEToolKitは、デフォルトで非共有フォルダ(→ `nonshared_raw/`)へのコピー処理が実行されます。そのため非共有フォルダへの格納のために処理を追加する必要は有りません。
+RDEToolKitのデフォルト設定では、入力ファイルは非共有フォルダ(→ `nonshared_raw/`)へのコピー処理が実行されます。そのため非共有フォルダへの格納のために処理を追加する必要は有りません。
 
 逆に共有フォルダ(raw/フォルダ)へ書き込み対場合は、設定を変更する必要があります。
 
@@ -917,7 +956,7 @@ from modules.datasets_process import dataset
 def main() -> None:
     config = Config(
         system=SystemSettings(
-            extended_mode="multidatatile",
+            extended_mode="MultiDataTile",
             save_nonshared_raw=False,
             save_raw=True,
         ),
@@ -933,4 +972,8 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
+
+> `save_nonshared_raw`に`False`をセットすることで、nonshared_raw/フォルダへのコピーを抑止し、`save_raw`に`True`をセットすることでraw/フォルダへのコピーを実施するようにしています。
+>
+> また別述のように、RDEToolKitの設定は外部ファイル(`tasksupport/rdeconfig.yml`など)で指定することも可能です。詳しくは関連する章や別途公開されているオンラインマニュアルなどを参照ください。
 
