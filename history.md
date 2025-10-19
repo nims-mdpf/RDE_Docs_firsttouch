@@ -1,5 +1,9 @@
 # 更新履歴
 
+## 2025/10/20
+- RDEToolKitの各登録モードの利用事例ハンズオンを更新
+  - RDEToolKit v1.3.4対応など
+
 ## 2025/10/07
 - RDEToolKit(invoiceモード)を利用したシンプルなRDEデータ構造化処理プログラムハンズオン(doc3)更新
   - ExcelInvoiceの説明についてRDEToolKit v1.3.4対応など
