@@ -14,18 +14,18 @@
 $ source venv/bin/activate
 
 (venv) $ python -m rdetoolkit version
-1.2.0
+1.3.4
 ```
 
 > RDEToolKitは随時アップデートされますので上記とは異なる表記となる場合があります。
 
-現時点(2025年5月)では、`v1.2.0`が最新となっています。それより前のバージョンをお使いの場合は、最新バージョンにアップデートすることができます。
+現時点(2025年09月)では、`v1.3.4`が最新となっています。それより前のバージョンをお使いの場合は、最新バージョンにアップデートすることができます。
 
 ```bash
 pip install rdetoolkit --upgrade
 ```
 
-> 新規開発の場合は、RDEToolKitの最新バージョンをお使いください。既存バージョンの修正の場合は、以前と同じバージョンでの利用でも問題ありませんが、RDEToolKitの最新バージョンの導入およびそれに合わせてPythonスクリプトの修正することを推奨します。
+> 新規開発の場合は、RDEToolKitの最新バージョンをお使いください。既存バージョンの修正の場合は、以前と同じバージョンでの利用でも問題ありませんが、RDEToolKitの最新バージョンの導入とそれに合わせたPythonスクリプトの修正を推奨します。
 
 ## 初期フォルダ構成作成
 
@@ -69,9 +69,15 @@ Check the folder: /home/devel/rde-sample/multidatatile
 Done!
 ```
 
-> 上記例は、ユーザ：develにて実行した場合の例です。実行ユーザに関しては以下同様とします。
+> 上記例は、ユーザ`devel`にて実行した場合の例です。実行ユーザに関しては以下同様とします。
 
-## Config指定方法
+構造化処理プログラムは`container/`フォルダ下に作成しますので、移動します。
+
+```bash
+cd container/
+```
+
+## モード指定方法およびRDEToolKit設定ファイルの利用方法
 
 前述の様に、マルチデータタイルモードおよびRDEフォーマットモードを使用する場合は、その旨を指定する必要があります。
 
@@ -81,6 +87,8 @@ Done!
 2. 設定ファイル(data/tasksupport/rdeconfig.yml または data/tasksupport/rdeconfig.yaml)に指定する方法
 
 > 上記1.と2.を同時に使用することはできません。1.の方法を使った場合、2.の設定ファイルを設置しても無視されます。
+
+なお、設定できる内容はモードの指定だけではなく、いくつかのRDEToolKitの振る舞いを変更することができます。本章では、モード指定の方法以外の`設定`の指定内容や、その方法についての記述も合わせて行います。
 
 ### Config オブジェクトを指定する方法
 
@@ -98,6 +106,8 @@ config = Config(
 )
 rdetoolkit.workflows.run(config=config)
 ```
+
+> main.pyを上記の様に変更しただけでは、実行時に`rdetoolkit.exceptions.StructuredError: ERROR: no zipped input files`となります。RDEFormatモードを利用する場合の例については、次章以降で説明します。
 
 このように、Configオブジェクトにはいくつかのプロパティを設定することができます。
 
@@ -117,7 +127,7 @@ rdetoolkit.workflows.run(config=config)
 | save_thumbnail_image | main_imageにある画像ファイルをthumbnailとして保存するか? | Boolean | True | |
 | magic_variable | マジック変数({$filename})をファイル名に置き換えるか? | Boolean | False | |
 
-> extended_modeで指定できるのは、'rdeformat' または 'MultiDataTile' (大文字小文字無視)です。それ以外を指定した場合は、指定しない場合と同様に解釈されます。
+> extended_modeで指定できるのは、'rdeformat' または 'MultiDataTile' (大文字小文字を**区別**)です。それ以外を指定した場合は、指定しない場合と同様に解釈されます。
 >
 > これらの項目は、すべて任意指定です。指定されない場合は、規定値が指定されたものとして実行されます。
 
@@ -138,6 +148,8 @@ config.system.save_thumbnail_image = True
 
 rdetoolkit.workflows.run(config=config)
 ```
+
+> 最初の`config = rdetoolkit.config.Config()`で、すべて既定値がセットされたConfigオブジェクトを生成し、その下の2行で、既定値とは違う値をセットするもののみをセットします。
 
 ### 設定ファイルを使用する方法
 
