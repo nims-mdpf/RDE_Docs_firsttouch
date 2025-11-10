@@ -177,7 +177,7 @@ limactl stop doker
 >
 > limaのdocker vmの上で/etc/enviromentでproxyの設定が引き継がれていたのが原因であるため、これを無効にします。
 
-また、limaのVMは自動では起動してくれないので自動起動させます。やり方は複数ありますが、ここではショートカットアプリを使用する方法を示します。
+また、limaのVMは初期状態では自動で起動してくれないので自動起動させます。やり方は複数ありますが、ここではショートカットアプリを使用する方法を示します。
 
 * ショートカットアプリを起動し新規作成します。
 * Appタブのターミナルから`シェルスクリプトを実行`をダブルクリックし、スクリプト入力欄に以下の処理を追加します。
@@ -192,9 +192,7 @@ limactl start docker
 
 ### Linux 環境
 
-Linuxでは、Docker Engineが利用できます。以下は一般的な手順ですが、Linuxディストリビューションによって異なる場合がありますので、公式のドキュメントを参照してください。
-
-> 参考: [Install Docker Engine - docker docs](https://docs.docker.com/engine/install/)
+Linuxでは、Docker Engineが利用できます。Linuxディストリビューションによって異なる場合がありますが、以下が一般的な手順です。
 
 1. OS標準提供のDocker Engineのアンインストール (インストール済みの場合)
 1. apt/dnf等インストールツールに、Dockerリポジトリの追加
@@ -202,7 +200,10 @@ Linuxでは、Docker Engineが利用できます。以下は一般的な手順�
 1. dockerdデーモンの起動(および自動起動設定)
 
 > 一般的にOS標準提供のDocker Engineは最新版より古いものであることが多いため、Docker公式から提供されている最新版をインストールして利用するようにします。
-> ここでは、インストールの手順詳細については記述しません。上で示した公式ドキュメントを参照して作業を実施してください。
+> ここでは、インストールの手順詳細については記述しません。公式ドキュメントを参照して作業を実施してください。
+>
+> [Install Docker Engine - docker docs](https://docs.docker.com/engine/install/)
+
 
 ## プロキシ設定
 
@@ -241,10 +242,11 @@ $ docker info | grep -i proxy
 
 ### dockerコマンド向けの設定
 
-ホームディレクトリに以下のフォルダを作成します。
+ホームディレクトリに設定格納用のフォルダを作成し、そこに設定ファイルを作成します。
+
 ```bash 
-$ mkdir .docker
-$ vi .docker/config.json
+mkdir .docker
+vi .docker/config.json
 ```
 
 設定する内容は以下の様にします。
@@ -269,7 +271,7 @@ Linux上で以下のコマンドを実行します。
 
 ```bash
 $ docker --version
-Docker version 27.5.1, build 9f9e405
+Docker version 28.5.1, build e180ab8
 ```
 
 > バージョンは随時更新されますので、上記と同じバージョンとなるとは限りません。
@@ -323,7 +325,7 @@ For more examples and ideas, visit:
  https://docs.docker.com/get-started/
 ```
 
-> 中程に"Hello from Docker!"と表示されているのが分かります。`Digest:`など一部の項目は実行の都度変わる可能性があります。
+> 中程に"Hello from Docker!"と表示されているのが分かります。`Digest:`など一部の項目は値が異なる可能性があります。
 
 上の実行は、初回実行なのでDockerイメージがダウンロードされていませんでした。そのため最初にダウンロード処理が実行されました。2回目以降の実行では、すでにイメージをダウンロードしているので、表示が短くなります。
 
