@@ -19,7 +19,7 @@ cd $HOME/rde-docker
 
 Dockerイメージを作成するための設定ファイルやPythonスクリプトを格納するフォルダとして、`dev_image/`フォルダを使うことにします。
 
-フォルダを作成し、移動します。
+$HOME/rde-docker 上にフォルダを作成し、移動します。
 
 ```bash
 mkdir dev_image
@@ -30,7 +30,9 @@ cd dev_image
 
 ### 構造化処理プログラムの用意
 
-これから開発していくので無くてもいいのですが、必要最低限のファイルとして"main.py"のみ用意することにします。
+必要最低限のファイルとして"main.py"のみを用意します。
+
+> 開発する構造化処理プログラムはこのフォルダとは別の場所に作成しますので、このファイルは動作確認のためにのみ使用します。
 
 以下の内容で、`$HOME/rde-docker/dev_image/main.py`を作成します。
 
@@ -49,23 +51,28 @@ if __name__ == '__main__':
 
 ### vimrcファイルの用意
 
-後述するように、ファイルの編集にvimを使うことを想定しています。
+Dockerコンテナ内でのファイルの編集にvimを使うことを想定しています。
 
-今回は以下の内容で`$HOME/rde-docker/dev_image/vimrc`を用意し、後ほどDockerイメージに組み込みます。
+利便性のため、以下の内容で`$HOME/rde-docker/dev_image/vimrc`を用意し、後ほどDockerイメージに組み込みます。
 
 ```vimrc
 syntax on
 set clipboard=unnamed,autoselect
 ```
 
-> 上の内容は、"構文ハイライトを有効"にし、"右クリックによるペーストを有効"にするものです。この設定は任意設定項目なので、必要が無ければ設定不要ですし、逆に他に必要な設定が有る場合は、ここに追加してください。
+この設定により、"構文ハイライトを有効"にし、"右クリックによるペーストを有効"にします。
+
+> それ以外に必要な設定がある場合は、追記してください。
+>
+> また、`nano`など他のエディタを使って編集する場合は、このファイルは不要です。
+
 
 ### requirements.txtの用意
 
 同じフォルダに、以下の内容で`requirements.txt`を用意します。
 
 ```
-rdetoolkit==1.2.0
+rdetoolkit==1.3.4
 ```
 
 > 上の例ではバージョン番号を指定してrdetoolkitをインストールしています。"=="の前後に空白を挟むとエラーになりますので注意してください。
@@ -103,7 +110,6 @@ COPY main.py /app
 > 構造化処理プログラムの実行には`vim`や`tree`コマンドは不要ですが、本マニュアル作成の都合上インストールしています。また構造化処理プログラムを、コンテナ内で編集するため`vim`をインストールしています。他のエディタで編集する場合は、適宜置き換えてください。
 >
 > vim設定ファイルは、コピー時に名称が変える必要があります(先頭にドット(.)を付与する)。
->
 
 この時点では、``$HOME/rde-docker/dev_image/`には、4つのファイルだけが存在している状態です。
 
@@ -123,14 +129,14 @@ Dockerfile  main.py  requirements.txt  vimrc
 
 ## Dockerイメージの作成
 
-`Dockerfile`があるフォルダ上にいることを確認します。
+現在の作業ディレクトリが、`Dockerfile`が存在するフォルダ上であることを確認します。
 
 ```bash
 $ pwd
 /home/[ユーザ名]/rde-docker/dev_image
 ```
 
-上記情報を使って、イメージを作成します。Dockerイメージを作成するには`docker build`コマンドを使います。
+上で決めたDockerイメージの名前とバージョンを使って、イメージを作成します。Dockerイメージを作成するには`docker build`コマンドを使います。
 
 > そのため、Dockerイメージを作成することを、"ビルドする"という場合があります。
 
@@ -149,9 +155,23 @@ $ docker build -t rde-sample:v0.1  ./
 > `-t`オプションで、上で決めたイメージの名前とバージョンを指定して作成します。名前とバージョンはコロン(:)を挟んで連結する必要があります。
 >
 > プロキシ環境下で`docker build`する場合は、$http_proxyや$https_proxy環境変数を設定する必要があります。
-> これは「`docker image pull`実行時は、systemctlで追加した設定を使う」が「`docker image build`コマンドがベースイメージを pull するときは、シェルの環境変数を参照する」という仕様のためです。
+> これは`docker image pull`コマンド実行時は、`systemctlで追加した設定を使う`のに対して、`docker image build`コマンドがベースイメージを pull するとき、つまりDockerfile内のFROM句で指定したイメージを取得する際は、シェルの環境変数を参照する」という仕様のためです。
+>
+> また$HOME/.docker/config.jsonにもプロキシの設定を追加しないと、ビルド時に実行されるaptコマンドやpip installコマンドなどが失敗します。
+> 以下に$HOME/.docker/config.jsonの設定例を示します。(プロキシサーバの部分は、それぞれの環境に合わせて変更してください)
 
-環境によっては、`docker build`コマンドが`SSLCertVerificationError`で正常に終了しない場合があります。その場合はDockerfileの`RUN pip install ～`の前に以下の行を追加してください。
+```JSON
+{
+  "proxies": {
+    "default": {
+      "httpProxy": "http://proxy.examle.com:8080",
+      "httpsProxy": "http://proxy.example.com:8080"
+    }
+  }
+}
+```
+
+さらに環境によっては、`docker build`コマンドが`SSLCertVerificationError`で正常に終了しない場合があります。その場合はDockerfileの`RUN pip install ～`の前に以下の行を追加してください。
 
 ```dockerfile
 ARG PIP_TRUSTED_HOST="pypi.python.org files.pythonhosted.org pypi.org pypi.io"
@@ -163,10 +183,12 @@ ARG PIP_TRUSTED_HOST="pypi.python.org files.pythonhosted.org pypi.org pypi.io"
 $ docker image ls
 REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 rde-sample    v0.1      b61962ef8995   7 minutes ago   1.64GB
-hello-world   latest    74cc54e27dc4   5 weeks ago     10.1kB
+:
 ```
 
 > `IMAGE ID`や`CREATED`欄に表示される値は、実行される環境に合わせて表示されるので、実際の表記は上記とは異なります。
+>
+> "hello-world"など他のイメージが表示される場合もありますが、ここでは、`rde-sample:v0.1`が表示されること、つまり正常にビルド処理が終わったことを確認します。
 
 ## コンテナ実行
 
@@ -187,13 +209,13 @@ root@50e097b072ce:/app#
 >
 > `--rm`は、`exit`コマンドによりコンテナから抜けた際にコンテナを削除することを指定します。必須ではありません。
 >
-> Dockerfile内で`WORKDIR /app`と指定しているので、`/app`に移動した状態から始まります。
+> Dockerfile内で`WORKDIR /app`と指定しているので、`/app`にいる状態から始まります。
 
 ```bash
 root@50e097b072ce:/app# ls
 main.py  requirements.txt
 root@50e097b072ce:/app# python --version
-Python 3.12.10
+Python 3.12.12
 ```
 
 > イメージをビルドした時期により、pythonのマイナーバージョンが異なる場合があります。
@@ -202,10 +224,10 @@ RDEToolKitがインストールされていることを確認します。
 
 ```bash
 root@50e097b072ce:/app# python -m rdetoolkit version
-1.2.0
+1.3.4
 ```
 
-> pypi上のRDEToolKitは随時バージョンアップが行われます。異なるバージョンが表示されることがあることに注意してください。
+> pypi上のRDEToolKitは随時バージョンアップが行われています。異なるバージョンが表示されることがあることに注意してください。
 >
 > pythonコマンドが利用出来ない場合は`python3`コマンドを使ってください。
 
@@ -213,16 +235,13 @@ root@50e097b072ce:/app# python -m rdetoolkit version
 
 ```bash
 root@50e097b072ce:/app# python main.py
-  0%|                                                                                             | 0/1 [00:00<?, ?it/s]
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py", line 229, in run
-    status = invoice_mode_process(str(idx), srcpaths, rdeoutput_resource, custom_dataset_function)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.12/site-packages/rdetoolkit/modeproc.py", line 369, in invoice_mode_process
-    invoice_validate(resource_paths.invoice.joinpath("invoice.json"), schema_path)
-  File "/usr/local/lib/python3.12/site-packages/rdetoolkit/validation.py", line 267, in invoice_validate
-    raise FileNotFoundError(emsg)
-FileNotFoundError: The schema and path do not exist: invoice.schema.json
+  File "/usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py", line 310, in run
+    status, error_info, mode = _process_mode(
+                               ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py", line 221, in _process_mode
+    raise StructuredError(emsg, status.error_code or 999)
+rdetoolkit.exceptions.StructuredError: Processing failed in Invoice mode: The schema and path do not exist: invoice.schema.json
 
 
 ============================================================
@@ -231,13 +250,12 @@ Custom Traceback (simplified and more readable):
 
 Traceback (simplified message):
 Call Path:
-   File: /usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py, Line: 229 in run()
-    └─ File: /usr/local/lib/python3.12/site-packages/rdetoolkit/modeproc.py, Line: 369 in invoice_mode_process()
-        └─ File: /usr/local/lib/python3.12/site-packages/rdetoolkit/validation.py, Line: 267 in invoice_validate()
-            └─> L267: raise FileNotFoundError(emsg) 🔥
+   File: /usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py, Line: 310 in run()
+    └─ File: /usr/local/lib/python3.12/site-packages/rdetoolkit/workflows.py, Line: 221 in _process_mode()
+        └─> L221: raise StructuredError(emsg, status.error_code or 999) 🔥
 
-Exception Type: FileNotFoundError
-Error: The schema and path do not exist: invoice.schema.json
+Exception Type: StructuredError
+Error: Processing failed in Invoice mode: The schema and path do not exist: invoice.schema.json
 ```
 
 > 実行するRDEToolKitのバージョンにより、表示される行番号は変更される可能性があります。

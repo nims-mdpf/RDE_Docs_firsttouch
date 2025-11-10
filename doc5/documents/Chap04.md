@@ -16,7 +16,7 @@ mkdir app
 ```
 
 > プロンプトを確認し、コンテナ内から抜けていることを確認してから上記を実行してください。コンテナ内にいる場合は`exit`コマンドでコンテナから抜けます。
-> また、カレントディレクトリが`dev_image/`でないことを確認してから`app/`フォルダを作成してください。
+> また、作業ディレクトリ(カレントディレクトリ)が`dev_image/`でないことを確認してから`app/`フォルダを作成してください。
 
 ## データフォルダ作成
 
@@ -49,7 +49,7 @@ data (今回の設置位置)
 
 ## コンテナ起動
 
-最終的には、コンテナ内の"/app"フォルダにスクリプトを配置したDockerイメージを作成しますが、上記で作成したダミーのスクリプトファイル(main.py)が配置されています。
+最終的には、コンテナ内の"/app"フォルダに開発済みのスクリプトを配置したDockerイメージを作成しますが、この時点のコンテナ内には、前章で作成したダミーのスクリプトファイル(main.py)が配置されています。
 
 それらダミーとして作成したものと、これからコンテナ上で新規に作成するものを区別するために、ここでは`/app2`にプログラムを、`/app2/data`の下にデータを配置することにします。
 
@@ -68,9 +68,9 @@ root@cfafcd0f658a:/app#
 
 ## フォルダ構成初期化
 
-`app2/`の下に、RDEToolKitが想定するフォルダ構成を、**コンテナ内で**"初期化"します。
+`/app2/`フォルダの下に、RDEToolKitが想定するフォルダ構成を、**コンテナ内で**"初期化"します。
 
-最初に、`app2/フォルダに移動します。
+最初に、`/app2/`フォルダに移動します。
 
 > 別のフォルダを利用する場合は、そのフォルダに移動してください。
 
@@ -106,13 +106,12 @@ root@cfafcd0f658a:/app2/container# ls -F
 Dockerfile  data/  main.py  modules/  requirements.txt
 
 root@cfafcd0f658a:/app2/container# python main.py 
+root@cfafcd0f658a:/app2/container#
 ```
-
-> 実際にはプログレスバーが表示されます。本書では、これ以降も、プログレスバー表示は重要ではないため表示省略します。
 
 ここでは、エラー表示なく終了したことを確認します。
 
-フォルダ構造の初期化が完了しましたので、いったんコンテナから抜けます。
+フォルダ構成の初期化が完了しましたので、いったんコンテナから抜けます。
 
 ```bash
 root@cfafcd0f658a:/app2/container# exit
@@ -120,7 +119,7 @@ exit
 $
 ```
 
-ローカル環境のフォルダを確認確認します。
+ローカル環境のフォルダを確認します。
 
 ```bash
 $ tree app
@@ -134,6 +133,7 @@ app
 │   │   │   └── invoice.json
 │   │   ├── invoice_patch
 │   │   ├── logs
+│   │   │   └── rdesys.log
 │   │   ├── main_image
 │   │   ├── meta
 │   │   ├── nonshared_raw
@@ -158,7 +158,7 @@ app
         ├── invoice.schema.json
         └── metadata-def.json
 
-24 directories, 9 files
+24 directories, 10 files
 ```
 
 > `python main.py`を実行しないで確認すると、initサブコマンド実行のメッセージに示されたとおり、`data/invoice/invoice.json`フォルダと`data/tasksupport`フォルダの2つだけ存在することになります。他のフォルダが存在しない場合は、上記で示している手順で`python main.py`を実行してください。
@@ -188,6 +188,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 ├── meta
 ├── nonshared_raw
@@ -200,10 +201,10 @@ data
 ├── temp
 └── thumbnail
 
-15 directories, 3 files
+15 directories, 4 files
 ```
 
-> `data/`フォルダの下にフォルダが3つしかない場合は、コンテナ内で`python main.py`が未実施な場合が考えられます。再度コンテナを起動し、その中で(`init`サブコマンドで作成された)`main.py`を実行してください。ただし、当該3フォルダ以外は、後続の`python main.py`処理実行時に作成されますので、必ずしも`python main.py`を実行する必要はありません。
+> `data/`フォルダの下にフォルダが3つしかない場合は、コンテナ内で`python main.py`が未実施な場合が考えられます。再度コンテナを起動し、その中で(`init`サブコマンドで作成された)`main.py`を実行してください。
 
 次に、ローカル環境での書き換え時に"sudo"コマンドを使わなくてもよいように、`app/`と`data/`のオーナーを"root"から、開発で使用しているユーザ(→本マニュアル上では"devel"ユーザ)に変更しておきます。
 
@@ -230,7 +231,7 @@ import rdetoolkit
 rdetoolkit.workflows.run()
 ```
 
-> RDEToolKitのinit処理にて生成される内容のままです。
+> RDEToolKitのinit処理にて生成された内容のままです。
 
 この状態で、`-v`オプションの設定を本番実行用のDockerイメージを想定したものに変更して、再度コンテナを実行します。
 
@@ -238,11 +239,10 @@ rdetoolkit.workflows.run()
 docker run -it --rm -v ${PWD}/app/container:/app2 -v ${PWD}/data:/app2/data rde-sample:v0.1 /bin/bash
 ```
 
-> 実際の本番環境では`app2/`フォルダではなく、`app/`フォルダを利用するため、本番実行環境用のDockerイメージと完全に同じというわけではありません。
->
-> 1個目のマウント元が`${PWD}/app`から`${PWD}/app/container`に変更になったことに注意してください。
->
-> 2個目のマウント設定により、コンテナ内での`main.py`実行で作成されたファイルは、マウント元の${HOME}/rde-docker/dataで確認することができるようになります。
+> 実際の本番環境ではスクリプトおよびデータは、`/app2/`フォルダではなく、`/app/`フォルダに配置されます。開発途中であることを明確に示す意味で`/app2`フォルダを使っています。
+
+* 1個目のマウント元が`${PWD}/app`から`${PWD}/app/container`に変更になったことに注意してください。
+* 2個目のマウント設定により、コンテナ内での`main.py`実行で作成されたファイルは、マウント元の${HOME}/rde-docker/dataで確認することができるようになります。
 
 フォルダの構成状況を確認すると以下の様になります。
 
@@ -258,6 +258,7 @@ root@7d92e5033f5e:/app2# tree
 │   │   └── invoice.json
 │   ├── invoice_patch
 │   ├── logs
+│   │   └── rdesys.log
 │   ├── main_image
 │   ├── meta
 │   ├── nonshared_raw
@@ -273,7 +274,7 @@ root@7d92e5033f5e:/app2# tree
 ├── modules
 └── requirements.txt
 
-17 directories, 6 files
+17 directories, 7 files
 ```
 
 念のため、エラーなく実行できることを確認します。
@@ -292,7 +293,7 @@ exit
 
 ## データ配置
 
-開発で実際に使うデータを、用意します。
+開発で実際に使うデータを用意します。
 
 本来の開発であれば、ここで実際に利用されるデータなどを配置しますが、今回は**ダミーデータを用意する**ことにします。
 
@@ -302,7 +303,7 @@ exit
 
 ### 入力データファイル
 
-`data/inputdata/sample.data`として、以下内容で作成します。
+以下の内容で`data/inputdata/sample.data`を作成します。
 
 ```text
 [METADATA]
@@ -363,9 +364,9 @@ series3
 
 ### 送り状ファイル
 
-`data/invoice/invoice.json`として、以下の内容で作成します。
+以下の内容で`data/invoice/invoice.json`を作成します。
 
-> 既にあるファイルは不要ですので、一旦すべて削除してから以下の内容に置き換えてください。
+> 既にあるファイルを一度削除の上、以下の内容で作成してください。
 
 ```json
 {
@@ -433,13 +434,13 @@ series3
 }
 ```
 
-### タスクサポートフォルダに置くファイル
+### tasksupportフォルダに置くファイル
 
 ここでは、`data/tasksupport/invoice.schema.json`と`data/tasksupport/metadata-def.json`を用意します。
 
-> 既にあるファイルはダミーですので、一旦すべて削除してから以下の内容に置き換えてください。
+> 既にあるファイル一度削除の上、以下の内容で作成してください。
 
-`data/tasksupport/invoice.schema.json`として、以下の内容で作成します。
+以下の内容で`data/tasksupport/invoice.schema.json`を作成します。
 
 ```json
 {
@@ -448,7 +449,8 @@ series3
     "description": "None",
     "type": "object",
     "required": [
-        "custom"
+        "custom",
+        "sample"
     ],
     "properties": {
         "custom": {
@@ -496,12 +498,29 @@ series3
                     "type": "string"
                 }
             }
+        },
+        "sample" : {
+            "type": "object",
+            "label": {
+                "ja": "試料情報",
+                "en": "Sample Information"
+            },
+            "required": [
+                "names"
+            ],
+            "properties": {
+                "generalAttributes": {
+                    "type": "array",
+                    "items": [
+                    ]
+                }
+            }
         }
     }
 }
 ```
 
-`data/tasksupport/metadata-def.json`として、以下の内容で作成します。
+以下の内容で`data/tasksupport/metadata-def.json`を作成します。
 
 ```json
 {
@@ -745,7 +764,7 @@ $ docker run -it --rm -v ${PWD}/app/container:/app2 -v ${PWD}/data:/app2/data rd
 root@b103229368dc:/app#
 ```
 
-`app2/`フォルダに移動します。
+`/app2/`フォルダに移動します。
 
 ```bash
 cd /app2
@@ -792,42 +811,42 @@ if __name__ == '__main__':
 
 ### modules/datasets_process.py
 
-上で確認したmodules/フォルダ配下に、実行したい処理が記述されたファイルを配置していきます。
+`/app2/modules/`フォルダ配下に、実行したい処理が記述されたファイルを配置していきます。
 
-最初に`main.py`の`custom_dataset_function`に指定した`dataset_process.py`を、以下の内容で作成します。
+最初に`main.py`の`custom_dataset_function`に指定した`datasets_process.py`を、以下の内容で作成します。
 
 ```python
 import io
-import statistics as st
-from pprint import pprint
+import shutil
 
 import pandas as pd
+import statistics as st
 import matplotlib.pyplot as plt
 from PIL import Image
+from rdetoolkit.rde2util import Meta
 from rdetoolkit.errors import catch_exception_with_message
 from rdetoolkit.exceptions import StructuredError
 from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
 from rdetoolkit.invoicefile import InvoiceFile
-#from rdetoolkit.rde2util import read_from_json_file, write_to_json_file
-from rdetoolkit.rde2util import Meta
 
 
 def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     # Check input file
-    input_dir = srcpaths.inputdata
-    input_files = list(input_dir.glob("*"))
+    input_files = resource_paths.rawfiles
     if len(input_files) == 0:
         raise StructuredError("ERROR: input data not found")
-    elif len(input_files) > 1:
+
+    if len(input_files) > 1:
         raise StructuredError("ERROR: input data should be one file")
-    else:
-        raw_file_path = input_files[0]
-        if raw_file_path.suffix.lower() != ".data":
-            raise StructuredError(
-                f"ERROR: input file is not '*.data' : {raw_file_path.name}"
-            )
+
+    raw_file_path = input_files[0]
+    if raw_file_path.suffix.lower() != ".data":
+        raise StructuredError(
+            f"ERROR: input file is not '*.data' : {raw_file_path.name}"
+        )
+
     # Read invoice file
-    invoice_file = srcpaths.invoice  / "invoice.json"
+    invoice_file = resource_paths.invoice  / "invoice.json"
     invoice = InvoiceFile(invoice_file)
 
     # Check public or private
@@ -853,8 +872,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     raw_data_df = None
     raw_meta_obj = None
     #
-    input_dir = srcpaths.inputdata
-    input_file = input_dir / "sample.data"
+    input_file = resource_paths.rawfiles[0] # read one file only
 
     with open(input_file) as f:
         lines = f.readlines()
@@ -882,9 +900,6 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
         temp_df.columns = ["x", series_name]
         raw_data_df.append(temp_df)
 
-    # Retrieve Meta data
-
-    # create Meta instance
     metadata_def_file = srcpaths.tasksupport / "metadata-def.json"
     meta_obj = Meta(metadata_def_file)
 
@@ -912,8 +927,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
         s_median.append("{:.2f}".format(st.median(y)))
         s_max.append(max(y))
         s_min.append(min(y))
-        s_stdev.append("{:.2f}".format(st.stdev(y)))
-
+        s_stdev.append("{:.2f}".format(st.stdev(y)))                                                                             
     meta_vars = {
         "series_name": s_name,
         "series_data_count": s_count,
@@ -925,7 +939,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     }
 
     # Merge 2 types of metadata
-    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"] 
+    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"]
     repeated_meta_info = meta_vars
 
     # Set metadata to meta instance
@@ -988,14 +1002,18 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     ratio_w = closure_w / img_org.width
     ratio_h = closure_h / img_org.height
     ratio = min(ratio_w, ratio_h)
-    img_re = img_org.resize((int(img_org.width * ratio), int(img_org.height * ratio)), Image.BILINEAR)  # image magickの>デフォルトに合わせてバイリニアとしている
+    img_re = img_org.resize((int(img_org.width * ratio), int(img_org.height * ratio)), Image.BILINEAR)  # image magickのデフォルトに合わせてバイリニアとしている
     img_re.save(out_img_file_path)
 
+    # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
+
+    # raw_dir = resource_paths.nonshared_raw if is_private_raw else resource_paths.raw
+    # input_file = resource_paths.rawfiles[0] # read one file only
+    shutil.copy(input_file, raw_dir)
 
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
 def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
     custom_module(srcpaths, resource_paths)
-
 ```
 
 ## 実行
@@ -1003,8 +1021,6 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 構造化処理プログラムを動かしてみます。
 
 ```bash
-$ docker run -it --rm -v ${PWD}/app/container:/app2 -v ${PWD}/data:/app2/data rde-sample:v0.1 /bin/bash
-
 root@633a74823e8b:/app2# python main.py 
 Traceback (most recent call last):
   File "/app2/main.py", line 4, in <module>
@@ -1024,11 +1040,11 @@ Dockerイメージを作り直します。
 $ vi dev_image/requirements.txt
 
 $ cat dev_image/requirements.txt 
-rdetoolkit==1.2.0
-matplotlib==3.10.3
+rdetoolkit==1.3.4
+matplotlib==3.10.7
 ```
 
-> `matplotlib==3.10.3`の行を追記します。
+> `matplotlib==3.10.7`の行を追記します。matplotlibのバージョンが不明の場合は、"==3.10.7"部分を付けずにbuildおよび実行し、`pip list`コマンドにて当該モジュールのバージョンを確認後、再度requirements.txtを修正してください。
 
 Dockerイメージを再作成します。
 
@@ -1062,12 +1078,14 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
+│   └── rdesys.log
 ├── main_image
 │   └── all_series.png
 ├── meta
 │   └── metadata.json
 ├── nonshared_raw
-│   └── invoice.json.orig
+│   ├── invoice.json.orig
+│   └── sample.data
 ├── other_image
 │   ├── series1.png
 │   ├── series2.png
@@ -1084,7 +1102,7 @@ data
 └── thumbnail
     └── thumbnail.png
 
-15 directories, 14 files
+15 directories, 16 files
 ```
 
 上記の例の場合、ファイル構成から、問題無く想定のファイルが出来ていることが確認できます。実際の開発では、ファイルの内容も含めて確認する必要があります。
@@ -1093,7 +1111,7 @@ data
 
 ## 2回目以降の実行
 
-スクリプトを修正して、再度実行する場合は、以下のような点に注意してください。
+PythonスクリプトやJSONファイル、YAMLファイルその他のファイルを修正して、再度実行する場合は、以下のような点に注意してください。
 
 ### job.failedファイルの削除
 
@@ -1114,15 +1132,23 @@ root@38dc486bc3a5:/app2# rm -f data/job.failed
 
 ### ログファイルのクリア
 
-設定によっては、`data/logs/rdesys.log`にログを出力します。
+必要に応じてログをクリア(→ 0バイトのファイルへの置き換え)や削除を実行してください。
 
-基本的に追記なので、ログのクリアを実行しなくても特に問題はありませんが、必要に応じてログをクリアしてください。
+> ログファイルが存在していなければ、次の実行時に新規に作成されますので、クリアも削除もどちらも同じ意味になります。
+>
+> ログは基本的に追記型なので、ログファイルのクリアや削除を実行しなくても特に問題はありません。ログが大きくなりすぎて見づらくなったなど、問題がある場合にクリア(または削除)してください。
+
+RDEToolKitを使った構造化処理プログラムは、`data/logs/rdesys.log`にログを出力します。
+
+また作成したスクリプトによっては、別のファイルにログを出力する(ユーザログファイル)こともあります。
+
+以下にログファイルを削除する場合の実行例を示します。
 
 ```bash
-root@38dc486bc3a5:/app2# :>data/logs/rdesys.log
+root@38dc486bc3a5:/app2# rm -f data/logs/*.log
 ```
 
-> `:`は何もしないコマンドです。標準出力には何も出力しないため、結果rdesys.logが0バイトのファイルになります。ログファイルは存在していなければ新規に作成されますので、`rm data/logs/rdesys.log`でファイルを削除しても構いません。
+> ユーザログファイルも、`data/logs`フォルダに出力するように作成します。
 
 ### 実行 (あるいはデバッグ)
 
@@ -1130,7 +1156,7 @@ root@38dc486bc3a5:/app2# :>data/logs/rdesys.log
 
 何らかの異常がある場合は、`main.py`や`modules/`フォルダ下のスクリプトファイルを修正します。
 
-以後、望む状態になるまで、開発と実行を繰り返します。
+以後、望む状態になるまで、修正と実行を繰り返します。
 
 ## (参考)スクリプトファイルやその他生成ファイルのオーナー
 

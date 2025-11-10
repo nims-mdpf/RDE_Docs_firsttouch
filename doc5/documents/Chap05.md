@@ -2,7 +2,7 @@
 
 # 本番用Dockerイメージ作成
 
-構造化処理プログラムの開発が一通り済んだら、そのプログラムファイルを組み込んだ、新しいDockerイメージを作成して、その確認を行います。
+構造化処理プログラムの開発が一通り済んだら、次にそのプログラムファイルを組み込んだ、新しいDockerイメージを作成して、その確認を行います。
 
 ここまで使っていたDockerイメージでは構造化処理プログラム、つまりPythonスクリプトはホスト側(Dockerを実行しているサーバ上、つまりローカル環境上)のフォルダ上にあり、Dockerコンテナを再起動してもその変更内容が消えずに有効になるような状態で開発をしていました。つまり、いわば`開発用コンテナ`を利用していたことになります。
 
@@ -10,7 +10,7 @@
 
 本章では、構造化処理プログラムをDockerイメージ内に含めるようにDockerfileを作成し、Dockerイメージを再生成します。その後、そのDockerイメージを使ったコンテナを使い構造化処理に問題無いことを確認します。
 
-この時点で、コンテナ内にいる場合は、抜けます。
+最初に、この時点でコンテナ内にいる場合は、抜けます。
 
 ```bash
 root@38dc486bc3a5:/app2# exit
@@ -20,7 +20,7 @@ $
 
 ## フォルダ移動
 
-`app/container`フォルダに、新しいDockerイメージを作成するためのひな形が用意されているので、これを変更していきます。
+`app/container`フォルダに、新しいDockerイメージを作成するためのひな形が用意されていますので、これを変更していきます。
 
 `app/container`に移動します。
 
@@ -29,24 +29,24 @@ cd ${HOME}/rde-docker
 cd app/container
 ```
 
-> 前述の様に、コンテナ外での編集には`sudo`の利用が必要となる場合があります。必要に応じて利用してください。
+> 前述の様に、コンテナ外での編集にはオーナーの変更、もしくはsudoを利用した編集が必要となる場合があります。適宜実施してください。
 
 ## requirements.txt
 
-RDEToolKitおよびその依存パッケージ**以外**のpipパッケージを利用する場合は、requirements.txtにそのパッケージ名を追記してください。
+RDEToolKitおよびその依存ライブラリ**以外**のPythonライブラリを利用する場合は、requirements.txtにそのライブラリ名を追記してください。
 
-> 特に追加パッケージがない場合は、変更不要です。
+> 特に追加ライブラリがない場合は、変更不要です。
 >
 > また、指定時は、以下の様にバージョン番号も含めての記述を推奨します。
 
 requirements.txtの例：
 
 ```text
-rdetoolkit==1.2.0
+rdetoolkit==1.3.4
 pydantic-xml==2.12.1
 ```
 
-上記の例の場合、`rdetoolkit バージョン1.2.0`とそれに伴う依存パッケージの他に、`pydantic-xml バージョン2.12.1` およびその依存パッケージが導入されます。
+上記の例の場合、`rdetoolkit バージョン1.3.4`とそれに伴う依存ライブラリの他に、`pydantic-xml バージョン2.12.1` およびその依存ライブラリが導入されます。
 
 > "#"で始まる行はコメント行です。そのままでもいいですし、削除してしまっても構いません。
 
@@ -57,8 +57,16 @@ vi requirements.txt
 前述の開発環境と同様に、`matplotlib`を指定します。
 
 ```text
-rdetoolkit==1.2.0
-matplotlib==3.10.3
+rdetoolkit==1.3.4
+matplotlib==3.10.7
+```
+
+> この時点で、開発時のrequirements.txtを参照するには、以下の様にします。
+
+```bash
+$ cat ${HOME}/rde-docker/dev_image/requirements.txt 
+rdetoolkit==1.3.4
+matplotlib==3.10.7
 ```
 
 ## Dockerfile
@@ -83,11 +91,11 @@ COPY modules/ /app/modules/
 ```dockerfile
 FROM python:3.12-bookworm
 
-# treeコマンドインストール
+# OSパッケージの更新
 RUN apt-get update && apt-get upgrade -y \
 && rm -rf /var/lib/apt/lists/*
 
-# appディレクトリを作成
+# WORKDIR指定
 WORKDIR /app
 
 # requirements.txt設置
@@ -108,7 +116,7 @@ COPY modules/ /app/modules/
 
 2. pip自体のアップデート処理を追加します。
 
-> 構造化処理プログラムの中で"RDEToolKitが必要とするpipパッケージ以外のpipパッケージ"を利用する場合は、requirements.txtにバージョン番号を含めて追記します。
+> 構造化処理プログラムの中で"RDEToolKitが必要とするPythonライブラリ以外のPythonライブラリ"を利用する場合は、requirements.txtにバージョン番号を含めて追記します。
 
 3. `modules/`フォルダのコピー処理を追加します。
 
@@ -121,7 +129,7 @@ docker build -t rde-sample:v1.0 ./
 ```
 
 > 本番用イメージということで、バージョン番号を"v1.0"に変更しています。
-> Proxy環境下にいる場合は、`$http_proxy`や`$https_proxy`などに適切な設定を行ってから再構築作業を行ってください。
+> Proxy環境下にいる場合は、ローカル環境の環境変数`$http_proxy`や`$https_proxy`などに適切な設定を行ってから再構築作業を行ってください。
 
 ## 確認
 
@@ -150,6 +158,8 @@ root@4443d3a722af:/app# cd /app2
 root@4443d3a722af:/app2# python /app/main.py 
 ```
 
+> `docker run`実行前に、正しいフォルダに移動する必要があることに注意してください。
+
 treeコマンドはインストールされていないため実行できませんが、仮にDockerイメージ作成時にtreeコマンドをインストールした場合の実行例を以下に示します。
 
 ```bash
@@ -169,7 +179,8 @@ root@4443d3a722af:/app2# tree
     ├── meta
     │   └── metadata.json
     ├── nonshared_raw
-    │   └── invoice.json.orig
+    │   ├── invoice.json.orig
+    │   └── sample.data
     ├── other_image
     │   ├── series1.png
     │   ├── series2.png
@@ -186,9 +197,9 @@ root@4443d3a722af:/app2# tree
     └── thumbnail
         └── thumbnail.png
 
-16 directories, 15 files
+16 directories, 16 files
 ```
 
 > RDEToolKitを利用した構造化処理プログラムでは、`data/`フォルダとして**カレントディレクトリにあるもの**が使われます。そのため、`python main.py`ではなく`cd /app2`の後に、`python /app/main.py`を実行しています。
 >
-> また、本来は入力データを`nonshared_raw/`フォルダまたは`raw/`フォルダのいずれかにコピーします。今回は、`main.py`の中で双方へのコピー処理を無効にしましたので、上記の様に入力データ(sample.data)がコピーされていません。双方無効にした場合は、コピー処理を追記する必要があることに注意してください。
+> また、本来は入力データを`nonshared_raw/`フォルダまたは`raw/`フォルダのいずれかにコピーします。今回は、`main.py`の中で双方へのコピー処理を無効にしましたので、双方無効にした場合は、コピー処理を追記する必要があることに注意してください。
