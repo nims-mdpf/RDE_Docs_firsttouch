@@ -1,5 +1,8 @@
 # 更新履歴
 
+## 2025/12/05
+- RDE_rdetoolkit_5mode_templatesへのリンクと説明を追加
+
 ## 2025/11/10
 - doc5 RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書　の更新
   - 文言修正(内容の変更なし)
