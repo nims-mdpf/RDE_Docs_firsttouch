@@ -64,6 +64,10 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
     - 順次追加していきますので[NIMS-MDPF github](https://github.com/nims-mdpf/)をご確認ください
 6. Dockerコンテナを使って開発をしたいという方はこちら
     - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
+7. RDEToolKitのデータ登録モードについてもっと知りたい方はこちら
+    - [RDE_rdetoolkit_5mode_templates](https://github.com/nims-mdpf/RDE_rdetoolkit_5mode_templates)
+       - RDEToolKitのデータ登録モード5種類について動かしながら学べるようになっています
+
 
 
 ## 関連リンク
@@ -71,6 +75,8 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 - [RDEToolKit in PyPi](https://pypi.org/project/rdetoolkit/)
 - [RDE/データセットテンプレート生成、確認ツール](https://github.com/nims-mdpf/RDE_datasettemplate-schemafile-make-tool)
 - [RDE構造化処理結果プレビューツール](https://github.com/nims-mdpf/RDE_structured-result-preview-tool)
+- [RDE_rdetoolkit_5mode_templates](https://github.com/nims-mdpf/RDE_rdetoolkit_5mode_templates)
+
 ## 利用ルールおよびライセンス
  
 * 本プログラムはMITライセンスで提供されています。
@@ -86,4 +92,4 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 お問い合わせ フォーム<br>
 https://dice.nims.go.jp/contact/form.html
 
-2025.6.12 更新
+2025.12.05 更新
