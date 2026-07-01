@@ -11,7 +11,7 @@ RDEでは抽出したメタデータを、"metadata.json" というJSON形式の
 抽出されたメタデータがどのような項目を持ちうるかは、データセットを開設前に事前に準備する "metadata-def.json"という JSON ファイルを用意して記述しておく必要があります。
 本書では、すでに述べたようにmetadata-def.jsonがすでに用意された状態を想定しますが、通常は開発者が記述/作成する必要があります。
 
-多くの場合、「入力ファイルを読み込み取得したメタデータを、ファイル(medatada.json)として出力する」ことが想定されます。本書では、それ以外にもいくつかの方法でメタデータを収集する手段について実装例を示すことにします。
+多くの場合、「入力ファイルを読み込み取得したメタデータを、ファイル(metadata.json)として出力する」ことが想定されます。本書では、それ以外にもいくつかの方法でメタデータを収集する手段について実装例を示すことにします。
 
 ## 想定
 
@@ -20,7 +20,7 @@ RDEでは抽出したメタデータを、"metadata.json" というJSON形式の
   * invoiceファイルの`custom`部分
   * 入力データの、数値部分
 * 上記データをマージします。同じキーのデータがある場合は、**後から指定したもので上書き**する。
-* マージしたメタデータを、ファイル(medatada.json)として出力する。
+* マージしたメタデータを、ファイル(metadata.json)として出力する。
 
 > ここでいう"パース"とは、`文字データを解析して一定の形式のデータ構造に変換する処理`であり、`変換した結果から、メタデータや数値データを取り出す`ことを含みます。
 
@@ -43,18 +43,20 @@ RDEでは抽出したメタデータを、"metadata.json" というJSON形式の
 
 上記の流れに沿って、以下のように処理を追記します。
 
-modules/datasets-process.py
+modules/datasets_process.py
 
 ```python
 import statistics as st
-from rdetoolkit.rde2util import Meta
 
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+from rdetoolkit.rde2util import Meta
+:
+
+def custom_module(paths: RdeDatasetPaths) -> None:
     :
     # Retrieve Meta data
 
     # create Meta instance
-    metadata_def_file = srcpaths.tasksupport / "metadata-def.json"
+    metadata_def_file = paths.tasksupport / "metadata-def.json"
     meta_obj = Meta(metadata_def_file)
 
     # get meta data
@@ -94,7 +96,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     }
 
     # Merge 2 types of metadata
-    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"] 
+    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"]
     repeated_meta_info = meta_vars
 
     # Set metadata to meta instance
@@ -102,8 +104,23 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     meta_obj.assign_vals(repeated_meta_info)
 
     # Write metadata
-    metadata_json = resource_paths.meta / "metadata.json"
+    metadata_json = paths.meta / "metadata.json"
     meta_obj.writefile(metadata_json)
+    :
+
+```
+
+> 上の処理では、入力ファイルから取得したメタデータと送状から取得したメタデータをマージしています。つまり同じ項目名があった場合は送状側の値が出力されます。上書きでは不都合がある場合は、どちらかのキー名(項目名)を変更するなどして対応する必要があります。
+>
+> 以下に、送状の項目名は変更せず、メタデータを出力する前に別のキー名として出力する場合の例を示します。
+
+```python
+:
+    # Merge 2 types of metadata
+    measurement_date_invoice = invoice.invoice_obj["custom"]['measurement_date']
+    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"] | { 'measurement_date_invoice' : measurement_date_invoice }
+    repeated_meta_info = meta_vars
+:
 ```
 
 ## (参考) metadata.json
@@ -240,4 +257,3 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 今回は"表示名部分"のタイポ(誤字)なので英語表示のブラウザで実行した場合には、表示がおかしいことになります。その後の構造化処理には影響しません。
 
 しかし、表示名ではなく"項目名"部分を間違えた場合は、構造化処理プログラム内での指定と異なることになり、意図しない動きになる可能性があります。タイポ(誤字)には十分注意してください。
-

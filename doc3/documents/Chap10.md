@@ -2,7 +2,7 @@
 
 # 実験データの可読化
 
-データ登録者によりアップロードされる実験データのファイルは、必ずしもテキストファイルとは限りません。バイナリファイルの場合は、そのまま保存すると、データをダウンロードしたユーザ(データ利用者)が中のデータを確認したい場合、ユーザが読める形に変換する必要があり不便です。
+データ登録者によりアップロードされる実験データのファイルは、必ずしもテキストファイルとは限りません。バイナリファイルの場合は、そのまま保存すると、データをダウンロードしたユーザ(データ利用者)がデータを確認したい場合、ユーザが読める形に変換する必要があり不便です。
 
 そのため、構造化処理プログラムでバイナリデータの実験データを読み込んで処理するのであれば、それを誰もが読みやすいファイル書式に変換して保存する、つまり、可読化するとよいと考えられます。
 
@@ -21,12 +21,12 @@ modules/datasets_process.py
 
 ```python
 :
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     :
     # Write CSV file(s)
     for d in raw_data_df:
         fname = d.columns[1].replace(" ", "") + ".csv"
-        csv_file_path = resource_paths.struct / fname
+        csv_file_path = paths.struct / fname
         d.to_csv(csv_file_path, header=True, index=False)
 ```
 
@@ -34,7 +34,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 
 ## (参考)出力結果の確認
 
-上記のロジックを追加後、構造化処理プログラムを実行すると、"data/strucutured/"フォルダの下に以下のようなファイルができます。
+上記のロジックを追加後、構造化処理プログラムを実行すると、"data/structured/"フォルダの下に以下のようなファイルができます。
 
 ```bash
 (tenv) $ python main.py
@@ -99,4 +99,3 @@ x,series3
 13.0,52.0
 14.0,41.0
 ```
-

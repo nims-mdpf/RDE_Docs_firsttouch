@@ -2,22 +2,22 @@
 
 # 環境準備
 
-ローカル開発環境として求めれるのは、以下のようなものです。
+ローカル開発環境として求められるのは、以下のようなものです。
 
 | 項目 | 内容 | 備考 |
 | ---- | ---- | ---- |
 | 開発マシン | 実機、仮想マシンいずれも可 | | 
 | 開発OS | Linux | ディストリビューションは問わない |
 | 開発言語 | Python v3.10以上 | 仮想環境(venv)が利用できること |
-| RDEToolKit | v1.3.4 | 開発時点の最新版の利用を推奨 |
-| Docker | Docker Engine、 Docker CLI | |
+| RDEToolKit | v1.6.4 | 開発時点の最新版の利用を推奨 |
+| Docker | Docker Engine、 Docker CLI | Docker利用時のみ |
 | 開発補助ツール | テンプレート生成ツール、構造化処理結果プレビューツール | NIMS提供のツール。 テンプレート生成ツールの利用にはMS Excelが必要 |
 
 なおRDE実行環境では、主に`4vcpu、16GBメモリ、総ディスク容量10GB`の環境を利用して構造化処理プログラムが実行されますので、それを参考に実機、仮想マシンを用意してください。
 
 > 上記を超えるような性能を必要とする場合は、開発前にご相談ください。
 
-またRDEでは、内部でDocker機能を使用していますが、登録するコンテナはNIMSにてbuildするため、ローカル開発ではDocker機能の準備は必須ではありません。ただし、開発者は、Dockerイメージを作成するために使用する`Dockerfile`の作成までを求められますので、そのためにDocker Engine、Docker CLIの準備が必要となります。本書ではDockerを使った開発に関しては扱いません。別途提供している『RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書』を参照ください。
+RDEでは、内部でDocker機能を使用しています。開発者は、Dockerイメージを作成するために使用する`Dockerfile`の作成までを求められますが、本書ではDockerを使った開発に関しては扱いません。別途提供している『RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書』を参照ください。
 
 > 『RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書』は以下のURLにて公開されています。
 >
@@ -29,7 +29,7 @@
 | ---- | ---- | ---- |
 | 開発OS | Ubuntu 24.04 | |
 | 開発言語 | Python v3.12 | 仮想環境(venv)を含む |
-| パッケージ | RDEToolKit v1.3.4 | RDEToolKitの依存パッケージを含む |
+| パッケージ | RDEToolKit v1.6.4 | RDEToolKitの依存パッケージを含む |
 
 ## Linux環境
 
@@ -37,7 +37,7 @@
 
 Pythonが稼働すればよいので、ディストリビューションに特に制限はありません。
 
-> Pythonを実行するディストリビューションとして、現時点(2025年09月)では`Ubuntu 24.04`の利用を推奨します。以降本書では、Ubuntu 24.04を使った場合の実行例を示します。また、バージョン番号を明記しない`Ubuntu`は、`Ubuntu 24.04`を指すものとします。
+> Pythonを実行するディストリビューションとして、現時点(2026年06月)では`Ubuntu 24.04`の利用を推奨します。以降本書では、Ubuntu 24.04を使った場合の実行例を示します。また、バージョン番号を明記しない`Ubuntu`は、`Ubuntu 24.04`を指すものとします。
 
 また、実マシン上に構築されたOSでもいいですし、VirtualBoxなどを利用したVM(Virtual Machine)でも問題ありません。Windowsを利用している場合は、WSL2の利用を推奨します。
 
@@ -78,9 +78,9 @@ Python 3.12.3
 また仮想環境も利用しますので、インストールされていることを確認します。Ubuntuの場合、以下の様に確認できます。
 
 ```bash
-$ sudo apt list python3-venv 
+$ sudo apt list python3-venv
 一覧表示... 完了
-python3-venv/noble-updates,now 3.12.3-0ubuntu2 amd64 [インストール済み]
+python3-venv/noble-updates,noble-security,now 3.12.3-0ubuntu2.1 amd64 [インストール済み]
 N: 追加バージョンが 1 件あります。表示するには '-a' スイッチを付けてください。
 ```
 
@@ -102,7 +102,9 @@ python3 -m venv tenv
 ```
 
 > `-m venv`でモジュールの読み込みを、最後の`tenv`で仮想環境の名前を、それぞれ指定しています。後者は任意に命名して構いません。
-> すでに仮想環境として`tenv`が存在している場合は、適宜変更してください。本書では、Python仮想環境として`tenv`を利用しているものとして記述します。
+> 上記例では、ホームディレクトリ上に作成していますが、他のディレクトリに作成しても問題ありません。
+>
+> 仮想環境として、すでに他の用途向けの`tenv`が存在している場合は、適宜変更してください。本書では、Python仮想環境として`tenv`を利用しているものとして記述します。
 
 ## Python仮想環境の有効化
 
@@ -148,7 +150,7 @@ pip     24.0
 pip自身を最新にします。
 
 ```bash
-pip install pip -U
+pip install pip --upgrade
 ```
 
 > Proxyの設定やSSLエラー対応などの設定がすでに済んでいるものとします。
@@ -165,41 +167,53 @@ pip install rdetoolkit
 
 ```bash
 Package                   Version
-------------------------- -----------------
+------------------------- -----------
+annotated-doc             0.0.4
 annotated-types           0.7.0
-attrs                     25.3.0
-build                     1.3.0
-chardet                   5.2.0
-charset-normalizer        3.4.3
-click                     8.2.1
+attrs                     26.1.0
+build                     1.5.0
+chardet                   7.4.3
+charset-normalizer        3.4.7
+click                     8.4.0
+contourpy                 1.3.3
+cycler                    0.12.1
 et_xmlfile                2.0.0
-eval_type_backport        0.2.2
-jsonschema                4.25.1
-jsonschema-specifications 2025.4.1
-Markdown                  3.8.2
-numpy                     2.3.2
+eval_type_backport        0.3.1
+fonttools                 4.63.0
+jsonschema                4.26.0
+jsonschema-specifications 2025.9.1
+kiwisolver                1.5.0
+Markdown                  3.10.2
+markdown-it-py            4.2.0
+matplotlib                3.10.9
+mdurl                     0.1.2
+numpy                     2.4.5
 openpyxl                  3.1.5
-packaging                 25.0
-pandas                    2.3.2
-pip                       25.2
-polars                    1.32.3
-pyarrow                   21.0.0
-pydantic                  2.11.7
-pydantic_core             2.33.2
+packaging                 26.2
+pandas                    3.0.3
+pillow                    12.2.0
+pip                       26.1.1
+polars                    1.40.1
+polars-runtime-32         1.40.1
+pyarrow                   24.0.0
+pydantic                  2.13.4
+pydantic_core             2.46.4
+Pygments                  2.20.0
+pyparsing                 3.3.2
 pyproject_hooks           1.2.0
 python-dateutil           2.9.0.post0
-pytz                      2025.2
-PyYAML                    6.0.2
-rdetoolkit                1.3.4
-referencing               0.36.2
-rpds-py                   0.27.0
+PyYAML                    6.0.3
+rdetoolkit                1.6.4
+referencing               0.37.0
+rich                      15.0.0
+rpds-py                   0.30.0
+shellingham               1.5.4
 six                       1.17.0
 toml                      0.10.2
-tomlkit                   0.13.3
-types-pytz                2025.2.0.20250809
+tomlkit                   0.15.0
+typer                     0.25.1
 typing_extensions         4.15.0
-typing-inspection         0.4.1
-tzdata                    2025.2
+typing-inspection         0.4.2
 ```
 
 > 他のバージョンのRDEToolKitの場合は、依存パッケージのバージョンも変わっている可能性があります。RDEToolKitでは、バージョン毎に必要なpipモジュールのバージョンも固定していますので注意してください。また、インストール時期により依存パッケージバージョンが変わるものもありますので、同じバージョンのRDEToolKitを利用していた場合でも、必ずしも上記と同じバージョンになるとは限りません。
@@ -253,6 +267,13 @@ Created: /home/devel/handson/tutorial/input/invoice/invoice.json
 Check the folder: /home/devel/handson/tutorial
 Done!
 ```
+
+> `python -m rdetoolkit`を、`rdetoolkit`と置き換えることができます。したがって、以下の2行は同じ意味となります。
+>
+> python -m rdetoolkit init
+> rdetoolkit init
+>
+> 本書では主に前者の書き方を使いますが、いずれを用いても構いません
 
 このバージョンのRDEToolKitでは、以下のディレクトリ/ファイルが作成されます。
 
@@ -386,7 +407,7 @@ Done!
 (tenv) $ ls
 Dockerfile  data  main.py  modules  requirements.txt
 (tenv) $ python -m rdetoolkit version
-1.3.4
+1.6.4
 ```
 
 * 上は本書執筆時点でのバージョンとなります。随時アップデートされます。
@@ -445,7 +466,7 @@ RDEToolKitの過去のバージョンでは、構造化処理プログラム実�
 
 以下、本書でのディレクトリまたはディレクトリを含むファイルの表記をする場合、init処理で作成された`container/`ディレクトリを起点として表記することにします。
 
-例： data/inputdata/sample.dat (本書の場合$HOME/handson/tutorial/container/data/inputdata/sample.datを意味します。
+例： data/inputdata/sample.data (本書の場合$HOME/handson/tutorial/container/data/inputdata/sample.dataを意味します。
 
 > `container/`配下以外の場所のファイルについて記述する場合は、フルパスで記述するか、$HOMEに続いて記述するなどして、それと分かるように記述します。
 
@@ -466,4 +487,3 @@ Ubuntuにて、treeコマンドをインストールする場合の例:
 ```bash
 sudo apt install tree
 ```
-
