@@ -1,5 +1,8 @@
 # 更新履歴
 
+## 2026/07/01
+- Doc3　RDE構造化処理プログラム開発 手順書　を更新 RDEToolKit : v1.6.4対応
+
 ## 2025/12/05
 - RDE_rdetoolkit_5mode_templatesへのリンクと説明を追加
 

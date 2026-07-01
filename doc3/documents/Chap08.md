@@ -21,14 +21,14 @@ import io
 
 import pandas as pd
 :
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     :
     # Read input data
     DELIM = "="
     raw_data_df = None
     raw_meta_obj = None
     #
-    input_file = resource_paths.rawfiles[0] # read one file only
+    input_file = paths.rawfiles[0] # read one file only
 
     with open(input_file) as f:
         lines = f.readlines()
@@ -59,7 +59,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 
 ここでは、ファイルを指定して、それを読み込み、dict形式オブジェクトにするまでを実装しています。 実装内容は、利用する入力ファイルにより異なります。
 
-上記により、2つのオブジェクト(raw_data_dfとraw_meta_obj)の2つが作成されます。
+上記により、2つのオブジェクト(raw_data_dfとraw_meta_obj)が作成されます。
 
 pprint()などを使って内容を確認できます。現在の`custom_module`関数の末尾に以下を挿入します。
 
@@ -72,7 +72,7 @@ pprint()などを使って内容を確認できます。現在の`custom_module`
 ：
 ```
 
-上記4行を追記したのち、実行すると以下の様になります。
+上記4行を追記したのち、`python main.py`を実行すると以下の様になります。
 
 ```bash
 (tenv) $ python main.py 
@@ -130,4 +130,3 @@ pprint()などを使って内容を確認できます。現在の`custom_module`
 > 以降の章で、これら(raw_data_dfとraw_meta_obj)を利用します。
 
 > 上で確認のために追記した4行は、対象のオブジェクトの内容確認のために追加したものです。後続の処理では使いませんので、確認後削除してください。
-

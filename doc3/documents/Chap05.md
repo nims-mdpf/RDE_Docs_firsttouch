@@ -12,7 +12,7 @@ RDE構造化処理プログラム中で、以降の処理を停止するよう�
 
 ```python
 ：
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     print("Hello RDE!")
     raise StructuredError('*** RDE ERROR ***', 200)
 :
@@ -36,6 +36,8 @@ Call Path:
 Exception Type: StructuredError
 Error: *** RDE ERROR ***
 ```
+
+> 行番号など細かい差異が発生する場合がありますが、概ね上記のような出力となります。
 
 同時に、"data/job.failed"ファイルが作成され、上記で設定した内容が書き込まれます。
 

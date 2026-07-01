@@ -28,7 +28,7 @@ RDE では、アップロードされたデータは構造化処理前は、`dat
 本書では、以下の様に想定します。
 
 * data/invoice/invoice.jsonの"custom" → "is_private_raw"の値から、データ毎に決定する。
-* "is_provate_raw"の値が"share"の場合は"公開"とする。それ以外の値の場合は非公開とする。
+* "is_private_raw"の値が"share"の場合は"公開"とする。それ以外の値の場合は非公開とする。
 * 公開の場合は"data/raw"フォルダに、非公開の場合は"data/nonshared_raw"フォルダにコピーする。
 
 ## custom_module()にロジックを実装
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
 前章で示した"想定"の様に、入力内容によって変えるには、自動的にnonshared_rawまたはrawフォルダにコピーされてしまっては問題があります。そのため、`raw/`にコピーする処理および`nonshared_raw/`にコピーする処理の**双方を無効**にします。
 
-自動でnonshared_rowフォルダまたはrawフォルダにコピーする処理を無効にするために、main.pyを以下の様にします。
+自動でnonshared_rawフォルダまたはrawフォルダにコピーする処理を無効にするために、main.pyを以下の様にします。
 
 ```python
 import rdetoolkit
@@ -113,7 +113,7 @@ modules/datasets_process.py
 ```python
 import shutil
 ：
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     ：
     # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
 
@@ -122,13 +122,16 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
     shutil.copy(input_file, raw_dir)
 ```
 
-> 入力ファイルおよびコピー先のフォルダは、ここまでの処理で変数にセットされているため、そのまま利用します。そのため、上記ではコメントとしてあります。
+> コピー先のフォルダ(→raw_dir)および入力ファイル(→input_file)は、ここまでの処理で既に変数にセットされているため、そのまま利用します。そのため、上記ではコメントとしてあります。
 
 実行すると以下の様になります。
 
 > 送り状にて、is_private_raw項目で"private"を選択した場合の例です。
 
 ```bash
+(tenv) $ ./reinit.sh
+:
+
 (tenv) $ python main.py
 
 (tenv) $ tree
@@ -140,4 +143,3 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 │   │   └── sample.data
 :
 ```
-

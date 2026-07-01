@@ -20,15 +20,15 @@ modules/datasets_process.pyは、以下の状態になっているものとし�
 ```python
 from rdetoolkit.errors import catch_exception_with_message
 from rdetoolkit.exceptions import StructuredError
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths
 
 
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     print("Hello RDE!")
 
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
-def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
-    custom_module(srcpaths, resource_paths)
+def dataset(paths: RdeDatasetPaths) -> None:
+    custom_module(paths)
 ```
 
 ## custom_module()にチェックロジックを実装
@@ -36,9 +36,9 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 custom_module()内に、入力ファイルのチェックロジックを追加していきます。
 
 ```python
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     # Check input file
-    input_files = resource_paths.rawfiles
+    input_files = paths.rawfiles
     if len(input_files) == 0:
         raise StructuredError("ERROR: input data not found")
 
@@ -56,12 +56,12 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
 > 本書の以前の版では`input_dir = srcpaths.inputdata`、`input_files = list(input_dir.glob("*"))`として入力ファイルを求めていました。その方法ではExcelインボイスでの登録時に問題が発生(入力ファイルを正しく認識できない)します。いずれのモードでも正しく処理が進むように、上で示した方法を利用してください。
 
 1. 1つ目のif文で、入力ファイルの個数が0かどうかをチェックし、0だったらエラーとして処理します。
-2. 次のif文で、同ファイル個数が1より多いかどうかをチェックし、多かったらエラーとして処理します。
+2. 次のif文で、ファイル数が1より多いかどうかをチェックし、多かったらエラーとして処理します。
 3. その後、ファイルが1個だけ存在することが確定していますので、そのファイルの拡張子が".data"かどうかをチェックし、そうでない場合はエラーとして処理します。
 
 ## 確認
 
-ダミーファイルを置き、data/inpudataフォルダにファイルが"2個"存在する状態にし、エラーとなるかを確認します。
+ダミーファイルを置き、data/inputdataフォルダにファイルが"2個"存在する状態にし、エラーとなるかを確認します。
 
 ```bash
 (tenv) $ touch data/inputdata/dummy.txt
@@ -77,10 +77,10 @@ dummy.txt  sample.data
 
 Traceback (simplified message):
 Call Path:
-   File: /home/devel/tenv/lib/python3.11/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
-    └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 24 in dataset()
-        └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 14 in custom_module()
-            └─> L14: raise StructuredError("ERROR: input data should be one file") 🔥
+   File: /home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 46 in wrapper()
+    └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 23 in dataset()
+        └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 13 in custom_module()
+            └─> L13: raise StructuredError("ERROR: input data should be one file") 🔥
 
 Exception Type: StructuredError
 Error: ERROR: input data should be one file
@@ -98,7 +98,7 @@ ErrorCode=1
 ErrorMessage=Error: ERROR: input data should be one file
 ```
 
-画面に出たエラーメッセージと同じものが格納されていることが分かります。
+画面(→標準エラー出力)に出たエラーメッセージと同じものが格納されていることが分かります。
 
 > このjob.failedのErrorMessage句にセットされた内容が、RDEのWeb画面の登録結果画面に表示されます。
 >
@@ -126,10 +126,10 @@ mkdir data/inputdata/
 
 Traceback (simplified message):
 Call Path:
-   File: /home/devel/tenv/lib/python3.11/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
-    └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 24 in dataset()
-        └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 11 in custom_module()
-            └─> L11: raise StructuredError("ERROR: input data not found") 🔥
+   File: /home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 46 in wrapper()
+    └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 23 in dataset()
+        └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 10 in custom_module()
+            └─> L10: raise StructuredError("ERROR: input data not found") 🔥
 
 Exception Type: StructuredError
 Error: ERROR: input data not found
@@ -148,10 +148,10 @@ Error: ERROR: input data not found
 
 Traceback (simplified message):
 Call Path:
-   File: /home/devel/tenv/lib/python3.11/site-packages/rdetoolkit/errors.py, Line: 43 in wrapper()
-    └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 24 in dataset()
-        └─ File: /home/devel/tutorial/container/modules/datasets_process.py, Line: 18 in custom_module()
-            └─> L18: raise StructuredError( 🔥
+   File: /home/devel/handson/tenv/lib/python3.12/site-packages/rdetoolkit/errors.py, Line: 46 in wrapper()
+    └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 23 in dataset()
+        └─ File: /home/devel/handson/tutorial/container/modules/datasets_process.py, Line: 17 in custom_module()
+            └─> L17: raise StructuredError( 🔥
 
 Exception Type: StructuredError
 Error: ERROR: input file is not '*.data' : sample.dat
@@ -171,6 +171,7 @@ mv data/inputdata/sample.dat data/inputdata/sample.data
 
 ```bash
 (tenv) $ ./reinit.sh
+./data/job.failed was removed
 ./data/logs was removed
 ./data/meta was removed
 ./data/main_image was removed

@@ -24,7 +24,7 @@ modules/datasets_process.py
 ：
 import matplotlib.pyplot as plt
 :
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     :
     # Write Graph
     title = const_meta_info["data_title"]
@@ -36,7 +36,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
         x = d.iloc[:, 0]
         y = d.iloc[:, 1]
         label = d.columns[1]
-        fname = resource_paths.other_image / f"{label}.png"
+        fname = paths.other_image / f"{label}.png"
         fig, ax = plt.subplots(figsize=(5, 5), facecolor="white")
         ax.plot(x, y, label=label)
         ax.set_title(title)
@@ -57,7 +57,7 @@ def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourceP
         label = d.columns[1]
         ax.plot(x, y, label=label)
     ax.legend()
-    fname = resource_paths.main_image / "all_series.png"
+    fname = paths.main_image / "all_series.png"
     fig.savefig(fname)
     plt.close(fig)
 ```
@@ -103,4 +103,3 @@ python main.py
 │   │   └── series3.png
 ：
 ```
-

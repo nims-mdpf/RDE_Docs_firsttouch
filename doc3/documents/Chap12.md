@@ -24,11 +24,11 @@ modules/datasets_process.py
 :
 from PIL import Image
 :
-def custom_module(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def custom_module(paths: RdeDatasetPaths) -> None:
     :
     # Write thumbnail images
-    src_img_file_path = resource_paths.main_image / "all_series.png"
-    out_img_file_path = resource_paths.thumbnail / "thumbnail.png"
+    src_img_file_path = paths.main_image / "all_series.png"
+    out_img_file_path = paths.thumbnail / "thumbnail.png"
     closure_w = 286
     closure_h = 200
 
@@ -55,7 +55,7 @@ data/thumbnail
 
 > thumbnail.pngが出力されていることが確認できます。RDEシステムでは、サムネイル画像のファイル名の規定はないので、上記以外のファイル名でも問題ありません。
 >
-> ただし、現時点(2025年09月)では、画像ファイルの形式に制限があります。GIF形式(.gif)、JPEG形式(.jpg、.jpeg)、あるいはPNG形式(.png)のいずれかである必要があります。SVG形式といった上記想定以外のファイル形式を使った場合、データセット利用ができない(登録は出来るがダウンロードできない、等)場合があります。想定される画像ファイル形式で保存するようにしてください。
+> ただし、現時点(2026年06月)では、画像ファイルの形式に制限があります。GIF形式(.gif)、JPEG形式(.jpg、.jpeg)、あるいはPNG形式(.png)のいずれかである必要があります。SVG形式といった上記想定以外のファイル形式を使った場合、データセット利用ができない(登録は出来るがダウンロードできない、等)場合があります。想定される画像ファイル形式で保存するようにしてください。
 
 ## (参考)画像データをそのままサムネイル画像として使う
 
@@ -110,12 +110,11 @@ if __name__ == '__main__':
 
 (tenv) $ ls -l data/main_image/
 合計 28
--rw-rw-r-- 1 enami enami 28473  5月  8 06:52 all_series.png
+-rw-rw-r-- 1 devel devel 28473  5月  8 06:52 all_series.png
 
 (tenv) $ ls -l data/thumbnail/
 合計 28
--rw-rw-r-- 1 enami enami 28473  5月  8 06:52 all_series.png
+-rw-rw-r-- 1 devel devel 28473  5月  8 06:52 all_series.png
 ```
 
 > `main_image/`フォルダにある"all_series.png"が、ファイル名も含め、そのまま`data/thumbnail/`フォルダにコピーされていることが分かります。
-

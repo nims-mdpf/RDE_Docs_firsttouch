@@ -7,7 +7,7 @@
 本章では、以下の様なことを実装します。
 
 * 入力ファイルごとに処理クラスとして記述する。
-* 設定ファイルとして、`pyptoject.toml`を使用する。
+* 設定ファイルとして、`pyproject.toml`を使用する。
 * 実行ログを、コンソール画面上、またはユーザ用のログファイルに出力する。
 
 ## 準備
@@ -56,7 +56,7 @@ Done!
 
 ### 入力ファイル
 
-入力ファイルとしてのsample.data、invoice.json、invoice.schema.json および matadata-def.jsonは、初級編と同じものを使うので、コピーしておきます。
+入力ファイルとしてのsample.data、invoice.json、invoice.schema.json および metadata-def.jsonは、初級編と同じものを使うので、コピーしておきます。
 
 > 初級編と同様、本テキストからのコピー&ペーストにより作成しても構いません。
 
@@ -149,6 +149,7 @@ pyproject.toml
 [tool.rdetoolkit.system]
 save_raw = false
 save_nonshared_raw = false
+save_thumbnail_image = false
 ```
 
 > `multidata_tile`にデータを設定する場合は、`[tool.rdetoolkit.multidata_tile]`節に設定します。その他独自設定を追加する場合は`[tool.rdetoolkit.(独自設定名)]`、具体的には`[tool.rdetoolkit.user]`のような節に設定します。独自設定項目は、他の方法で設定した場合と同様、スクリプト内ではdict形式で利用可能です。
@@ -157,7 +158,8 @@ save_nonshared_raw = false
 
 ### ログ出力
 
-RDEToolKitは、RDEToolKitが行った`作業`を、`data/logs/rdesys.log`ファイルにログ出力します。
+RDEToolKitは、RDEToolKitが行った`作業`を、`data/logs/rdesys_YYYYMMDD_HHmmss.log`(YYYYNMMDDは日付、HHmmssは実行時刻)ファイルにログ出力します。
+
 ここでは、上記とは別に、独自のログファイル出力を実装します。
 
 RDEToolKit v1.1.0から、ユーザログ出力用の専用クラスが実装されましたので、それを使うことにします。
@@ -169,23 +171,23 @@ RDEToolKit v1.1.0から、ユーザログ出力用の専用クラスが実装さ
 modules/datasets_process.py
 
 ```python
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths
 from rdetoolkit.rdelogger import CustomLog, log_decorator
 
 
 logger = CustomLog().get_logger()
 
 @log_decorator()
-def Huga():
+def Foo():
     pass
 
 @log_decorator()
-def Hoge():
+def Bar():
     logger.debug('Sample log!')
 
-def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
-    Hoge()
-    Huga()
+def dataset(paths: RdeDatasetPaths) -> None:
+    Foo()
+    Bar()
 ```
 
 関数の定義文(def文)にデコレートする(上部に`@log_decorator()`を前置する)ことで、デコレートした関数の実行のはじめと終わりにログを出力するようになります。
@@ -195,23 +197,23 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 実行すると、以下のようになります。
 
 ```bash
-(tenv) $ python main.py 
-2025-09-08 11:14:29 +0900 (INFO) Hoge            --> Start
-2025-09-08 11:14:29 +0900 (DEBUG) Sample log!
-2025-09-08 11:14:29 +0900 (INFO) Hoge            <-- End
-2025-09-08 11:14:29 +0900 (INFO) Huga            --> Start
-2025-09-08 11:14:29 +0900 (INFO) Huga            <-- End
+(tenv) $ python main.py
+2026-05-25 15:50:12 +0900 (INFO) Foo             --> Start
+2026-05-25 15:50:12 +0900 (INFO) Foo             <-- End
+2026-05-25 15:50:12 +0900 (INFO) Bar             --> Start
+2026-05-25 15:50:12 +0900 (DEBUG) Sample log!
+2026-05-25 15:50:12 +0900 (INFO) Bar             <-- End
 ```
 
 同時にログファイル(data/logs/rdeuser.log)にも同じ内容がセットされます。
 
 ```bash
-(tenv) $ cat data/logs/rdeuser.log 
-2025-09-08 11:14:29 +0900 (INFO) Hoge            --> Start
-2025-09-08 11:14:29 +0900 (DEBUG) Sample log!
-2025-09-08 11:14:29 +0900 (INFO) Hoge            <-- End
-2025-09-08 11:14:29 +0900 (INFO) Huga            --> Start
-2025-09-08 11:14:29 +0900 (INFO) Huga            <-- End
+(tenv) $ cat data/logs/rdeuser.log
+2026-05-25 15:50:12 +0900 (INFO) Foo             --> Start
+2026-05-25 15:50:12 +0900 (INFO) Foo             <-- End
+2026-05-25 15:50:12 +0900 (INFO) Bar             --> Start
+2026-05-25 15:50:12 +0900 (DEBUG) Sample log!
+2026-05-25 15:50:12 +0900 (INFO) Bar             <-- End
 ```
 
 開発が終了し、ログ出力が不要となった場合は、datasets_process.pyの上の方でセットした`get_logger()`の引数として`False`を与えればログ表示、および書き込みがなくなります。
@@ -261,11 +263,14 @@ $ ./reinit.sh
 ```bash
 (tenv) $ python main.py 
 
-(tenv) $ ls -l data/logs/rdeuser.log
-合計 0
+(tenv) $ tree data/logs
+data/logs
+└── rdesys_20260525_160330.log
+
+1 directory, 1 file
 ```
 
-> ログファイルが存在していないことが確認できます。ただしこの場合でも、システムログ(`data/logs/rdesys.log`)は出力されます。
+> ユーザログファイル(`rdeuser.log`)が存在していないことが確認できます。ただしこの場合でも、システムログ(`data/logs/rdesys_YYYYMMDD_HHmmss.log`)は出力されます。
 
 ### それ以外の実装
 
@@ -278,16 +283,16 @@ $ ./reinit.sh
 modules/datasets_process.py
 
 ```python
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths
 from rdetoolkit.errors import catch_exception_with_message
 
 from modules.custom_process import CustomProcess
 
 
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
-def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def dataset(paths: RdeDatasetPaths) -> None:
     # Create Instance of Custom Process
-    custom_process = CustomProcess(srcpaths, resource_paths)
+    custom_process = CustomProcess(paths)
 
     # Do some ...
     custom_process.check_input()
@@ -305,14 +310,13 @@ def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -
 modules/StructuredProcessBase.py
 
 ```python
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths 
 from rdetoolkit.exceptions import StructuredError
 
 
 class StructuredProcessBase:
-    def __init__(self, srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath):
-        self.srcpaths = srcpaths
-        self.resource_paths = resource_paths
+    def __init__(self, paths: RdeDatasetPaths):
+        self.paths = paths
 
     def check_input(self):
         raise NotImplementedError
@@ -350,7 +354,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths
 from rdetoolkit.errors import StructuredError
 from rdetoolkit.fileops import readf_json, writef_json
 from rdetoolkit.rde2util import Meta
@@ -365,9 +369,9 @@ class CustomProcess(StructuredProcessBase):
     additional_title = "(2024)"
 
     @log_decorator()
-    def __init__(self, srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath):
-        super().__init__(srcpaths, resource_paths)
-        self.invoice_file = resource_paths.invoice.joinpath('invoice.json')
+    def __init__(self, paths: RdeDatasetPaths):
+        super().__init__(paths)
+        self.invoice_file = paths.invoice.joinpath('invoice.json')
         self.data_df = None
         self.const_meta_info = dict()
         self.repeated_meta_info = dict()
@@ -376,7 +380,7 @@ class CustomProcess(StructuredProcessBase):
     @log_decorator()
     def check_input(self) -> bool:
         # Check input file
-        input_files = self.resource_paths.rawfiles
+        input_files = self.paths.rawfiles
         if len(input_files) == 0:
             raise StructuredError("ERROR: input data not found")
         if len(input_files) > 1:
@@ -395,7 +399,7 @@ class CustomProcess(StructuredProcessBase):
         raw_data_df = None
         raw_meta_obj = None
         #
-        input_file = self.resource_paths.rawfiles[0]
+        input_file = self.paths.rawfiles[0]
 
         with open(input_file) as f:
             lines = f.readlines()
@@ -471,9 +475,9 @@ class CustomProcess(StructuredProcessBase):
         # Backup(=Copy) invoice.json to shared/nonshared folder
         is_private_raw = self.is_private_raw
         if is_private_raw:
-            raw_dir = self.resource_paths.nonshared_raw
+            raw_dir = self.paths.nonshared_raw
         else:
-            raw_dir = self.resource_paths.raw
+            raw_dir = self.paths.raw
         if backup_file is None:
             backup_file = "invoice_backup.json"
         invoice_file_new = raw_dir.joinpath(backup_file)
@@ -483,8 +487,8 @@ class CustomProcess(StructuredProcessBase):
     def copy_raw_files(self) -> None:
         # Copy inputdata to public (raw/) or non_public (nonshared_raw/)
         is_private_raw = self.is_private_raw
-        raw_dir = self.resource_paths.nonshared_raw if is_private_raw else self.resource_paths.raw
-        for input_file in self.resource_paths.rawfiles:
+        raw_dir = self.paths.nonshared_raw if is_private_raw else self.paths.raw
+        for input_file in self.paths.rawfiles:
             shutil.copy(input_file, raw_dir)
 
     @log_decorator()
@@ -492,7 +496,7 @@ class CustomProcess(StructuredProcessBase):
         # create meta and save meta
         self._parse_from_invoice()
         self._parse_from_inputdata()
-        save_path = self.resource_paths.meta.joinpath("metadata.json")
+        save_path = self.paths.meta.joinpath("metadata.json")
         self._save_meta(save_path)
 
     def _parse_from_invoice(self) -> None:
@@ -538,7 +542,7 @@ class CustomProcess(StructuredProcessBase):
 
     def _save_meta(self, save_path) -> None:
         # Save metadata to file
-        metadef_filepath = self.srcpaths.tasksupport.joinpath("metadata-def.json")
+        metadef_filepath = self.paths.tasksupport.joinpath("metadata-def.json")
         metaobj = Meta(metadef_filepath)
         metaobj.assign_vals(self.const_meta_info)
         metaobj.assign_vals(self.repeated_meta_info)
@@ -551,7 +555,7 @@ class CustomProcess(StructuredProcessBase):
         # Write CSV file(s)
         for d in self.data_df:
             fname = d.columns[1].replace(" ", "") + ".csv"
-            csv_file_path = self.resource_paths.struct.joinpath(fname)
+            csv_file_path = self.paths.struct.joinpath(fname)
             d.to_csv(csv_file_path, header=True, index=False)
 
     @log_decorator()
@@ -566,7 +570,7 @@ class CustomProcess(StructuredProcessBase):
             x = d.iloc[:, 0]
             y = d.iloc[:, 1]
             label = d.columns[1]
-            fname = self.resource_paths.other_image.joinpath(f"{label}.png")
+            fname = self.paths.other_image.joinpath(f"{label}.png")
             fig, ax = plt.subplots(figsize=(5, 5), facecolor="white")
             ax.plot(x, y, label=label)
             ax.set_title(title)
@@ -587,16 +591,16 @@ class CustomProcess(StructuredProcessBase):
             label = d.columns[1]
             ax.plot(x, y, label=label)
         ax.legend()
-        fname = self.resource_paths.main_image.joinpath("all_series.png")
+        fname = self.paths.main_image.joinpath("all_series.png")
         fig.savefig(fname)
         plt.close(fig)
 
     @log_decorator()
     def make_thumbnail(self) -> None:
         # Write thumbnail images
-        src_path = self.resource_paths.main_image
+        src_path = self.paths.main_image
         src_img_file_path = src_path.joinpath("all_series.png")
-        save_path = self.resource_paths.thumbnail
+        save_path = self.paths.thumbnail
         out_img_file_path = save_path.joinpath("thumbnail.png")
 
         # Size of thumbnail
@@ -622,27 +626,27 @@ class CustomProcess(StructuredProcessBase):
 ```bash
 (tenv) $ ./reinit.sh
 :
-(tenv) $ python main.py
-2025-09-08 11:49:50 +0900 (INFO) __init__        --> Start
-2025-09-08 11:49:50 +0900 (INFO) __init__        <-- End
-2025-09-08 11:49:50 +0900 (INFO) check_input     --> Start
-2025-09-08 11:49:50 +0900 (INFO) check_input     <-- End
-2025-09-08 11:49:50 +0900 (INFO) parse_invoice   --> Start
-2025-09-08 11:49:50 +0900 (INFO) parse_invoice   <-- End
-2025-09-08 11:49:50 +0900 (INFO) update_invoice  --> Start
-2025-09-08 11:49:50 +0900 (INFO) update_invoice  <-- End
-2025-09-08 11:49:50 +0900 (INFO) parse_input     --> Start
-2025-09-08 11:49:50 +0900 (INFO) parse_input     <-- End
-2025-09-08 11:49:50 +0900 (INFO) make_meta       --> Start
-2025-09-08 11:49:50 +0900 (INFO) make_meta       <-- End
-2025-09-08 11:49:50 +0900 (INFO) make_struct     --> Start
-2025-09-08 11:49:50 +0900 (INFO) make_struct     <-- End
-2025-09-08 11:49:50 +0900 (INFO) make_graph      --> Start
-2025-09-08 11:49:50 +0900 (INFO) make_graph      <-- End
-2025-09-08 11:49:50 +0900 (INFO) make_thumbnail  --> Start
-2025-09-08 11:49:50 +0900 (INFO) make_thumbnail  <-- End
-2025-09-08 11:49:50 +0900 (INFO) copy_raw_files  --> Start
-2025-09-08 11:49:50 +0900 (INFO) copy_raw_files  <-- End
+(tenv) $ python main.py 
+2026-05-25 16:40:01 +0900 (INFO) __init__        --> Start
+2026-05-25 16:40:01 +0900 (INFO) __init__        <-- End
+2026-05-25 16:40:01 +0900 (INFO) check_input     --> Start
+2026-05-25 16:40:01 +0900 (INFO) check_input     <-- End
+2026-05-25 16:40:01 +0900 (INFO) parse_invoice   --> Start
+2026-05-25 16:40:01 +0900 (INFO) parse_invoice   <-- End
+2026-05-25 16:40:01 +0900 (INFO) update_invoice  --> Start
+2026-05-25 16:40:01 +0900 (INFO) update_invoice  <-- End
+2026-05-25 16:40:01 +0900 (INFO) parse_input     --> Start
+2026-05-25 16:40:01 +0900 (INFO) parse_input     <-- End
+2026-05-25 16:40:01 +0900 (INFO) make_meta       --> Start
+2026-05-25 16:40:01 +0900 (INFO) make_meta       <-- End
+2026-05-25 16:40:01 +0900 (INFO) make_struct     --> Start
+2026-05-25 16:40:01 +0900 (INFO) make_struct     <-- End
+2026-05-25 16:40:01 +0900 (INFO) make_graph      --> Start
+2026-05-25 16:40:03 +0900 (INFO) make_graph      <-- End
+2026-05-25 16:40:03 +0900 (INFO) make_thumbnail  --> Start
+2026-05-25 16:40:03 +0900 (INFO) make_thumbnail  <-- End
+2026-05-25 16:40:03 +0900 (INFO) copy_raw_files  --> Start
+2026-05-25 16:40:03 +0900 (INFO) copy_raw_files  <-- End
 ```
 
 どういったファイルが生成されているかの確認をします。
@@ -657,7 +661,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
-│   ├── rdesys.log
+│   ├── rdesys_20260525_164634.log
 │   └── rdeuser.log
 ├── main_image
 │   └── all_series.png
@@ -748,6 +752,14 @@ data/invoice/invoice.json
 
 > `"data_type": "variant",`の行を追加します。
 
+"basic"の"dataName"末尾に"/ (2024)"がついている場合は、その部分削除します。
+
+data/invoice/invoice.json
+
+```
+        "dataName": "NIMS_TRIAL_20230126b"
+```
+
 #### custom_process2.py
 
 続いて、「タイトルに"/ (2024)"を付加する」処理を「タイトルに"/ (2025)"を付加する」処理に変更したクラスを新規に作成します。
@@ -773,7 +785,7 @@ class CustomProcess2(CustomProcess):
 modules/datasets_process.py
 
 ```python
-from rdetoolkit.models.rde2types import RdeInputDirPaths, RdeOutputResourcePath
+from rdetoolkit.models.rde2types import RdeDatasetPaths
 from rdetoolkit.errors import catch_exception_with_message
 from rdetoolkit.invoicefile import InvoiceFile
 
@@ -782,16 +794,16 @@ from modules.custom_process2 import CustomProcess2
 
 
 @catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
-def dataset(srcpaths: RdeInputDirPaths, resource_paths: RdeOutputResourcePath) -> None:
+def dataset(paths: RdeDatasetPaths) -> None:
     # Parse invoice
-    invoice_file = resource_paths.invoice.joinpath("invoice.json")
+    invoice_file = paths.invoice.joinpath("invoice.json")
     invoice = InvoiceFile(invoice_file).invoice_obj
 
     ## Create Instance of Custom Process
     if invoice["custom"]["data_type"] == 'variant':
-        custom_process = CustomProcess2(srcpaths, resource_paths)
+        custom_process = CustomProcess2(paths)
     else:
-        custom_process = CustomProcess(srcpaths, resource_paths)
+        custom_process = CustomProcess(paths)
 
     # Do some ...
     custom_process.check_input()

@@ -4,13 +4,77 @@
 
 実装に先立ち、チュートリアルで利用するデータを配置します。
 
-> 本書で利用する入力データはテキストであり、かつ、大きなものではないので、本書から"コピー&ペースト"で準備することとします。
+本書で利用する入力データはテキストであり、かつ、大きなものではないので、本書から"コピー&ペースト"することでも準備できますが、ここではGitHub上で公開されているものをコピーすることにします。
 
-## sampla.data
+## samples.zipの取得
 
-入力データとして、`data/inputdata/sample.data`を以下の内容で作成します。
+本書同時に配布されている`samples.zip`に、上で用意したファイルと同じものが用意されています。
 
-> コピーの際に、本書のフッタやヘッダが含まれないように注意してください。
+* https://github.com/nims-mdpf/RDE_Docs_firsttouch/raw/refs/heads/main/doc3/samples.zip
+
+`curl`コマンドを用いる場合は、以下の様にします。
+
+```
+cd $HOME
+curl -OL https://github.com/nims-mdpf/RDE_Docs_firsttouch/raw/refs/heads/main/doc3/samples.zip
+```
+
+> リダイレクトが行われているため、`-O`オプションのほか、`-L`オプションも指定する必要があります。
+
+> 同様に、Pythonコードなどが含まれた`handson_codes.zip`も同時配布されます。こちらはこれ以降で作成されるPythonスクリプトが含まれています。こちらも必要に応じて利用してください。
+
+## samples.zipの展開と所定位置へのコピー
+
+unzipコマンドがない場合はインストールします。
+
+```bash
+sudo apt update
+sudo apt install unzip
+```
+
+以下ホームディレクトリに`samples.zip`が存在しているものとして、例を示します。
+
+```bash
+cd $HOME
+unzip samples.zip
+```
+
+これにより`samples/`フォルダ下にファイルが作成されます。
+
+```bash
+(tenv) $ unzip samples.zip
+Archive:  samples.zip
+   creating: samples/
+  inflating: samples/metadata-def.json
+  inflating: samples/invoice.schema.json
+  inflating: samples/sample.data
+  inflating: samples/invoice.json
+```
+
+所定の場所にコピーします。
+
+```bash
+cp samples/sample.data  $HOME/handson/tutorial/container/data/inputdata/
+cp samples/invoice.json  $HOME/handson/tutorial/container/data/invoice/
+cp samples/invoice.schema.json  $HOME/handson/tutorial/container/data/tasksupport/
+cp samples/metadata-def.json  $HOME/handson/tutorial/container/data/tasksupport/
+```
+
+> `samples/sample.data`以外の3ファイルは、init処理にてファイルが作成されているため、上書きする必要があります。
+
+以下、個々のファイルについてみていきます。
+
+もとのフォルダに戻ります。
+
+```
+cd $HOME/handson/tutorial/container/
+```
+
+## sample.data
+
+入力データとして、`data/inputdata/sample.data`が配置されます。
+
+> コピー&ペーストにて作成する場合は、本書(PDFファイル)のフッタやヘッダが含まれないように注意してください。
 
 data/inputdata/sample.data
 
@@ -71,52 +135,16 @@ series3
 14,41
 ```
 
-## invoice.jsonファイルの更新
-
-> 本来"invoice.json"ファイルは、RDEデータ登録画面からのデータ入力で自動的に作成された状態で構造化処理に渡ってきます。ローカル開発においては適切なinvoice.jsonを作成する手段がありませんので、本書では内容が入力されたinvoice.jsonを以下の様に手動作成することにします。
-
-> 指定書式のExcelファイルに適切に設定することで、invoice.jsonを生成するツールを別途提供しています。以下のURLを参照ください。
->
->  https://github.com/nims-mdpf/RDE_datasettemplate-schemafile-make-tool
-
-RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以下の内容で、`data/invoice/invoice.json`ファイルを上書きします。
-
-```json
-{
-    "datasetId": "8fdec13d-bca2-4808-8753-2bb7e4e9c927",
-    "basic": {
-        "dateSubmitted": "2023-01-26",
-        "dataOwnerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734",
-        "dataName": "NIMS_TRIAL_20230126b",
-        "instrumentId": "413e53fb-aec9-41f8-ae55-3f88f6cd8d41",
-        "experimentId": null,
-        "description": ""
-    },
-    "custom": {
-        "measurement_date": "2023-01-25",
-        "invoice_string1": "送状文字入力値1",
-        "invoice_string2": null,
-        "is_devided": "devided",
-        "is_private_raw": "private"
-    },
-    "sample": {
-        "sampleId": "4d6de819-4b42-4dfe-9619-a0a0588653bc",
-        "names": [
-            "試料"
-        ]
-    }
-}
-```
-
-> "invoice_string2"に指定しているnullは、データ登録時に入力が無かったことを意味します。RDEToolKitの古いバージョンでは、スキーマチェックで異常として検知されてしまうことがありました。その場合は、RDEToolKitのバージョンを新しいものに入れ替えてテストしてください。
->
-> 本書の後半で、タイトル("basic"中の"dataName")に変更を加える処理を実施します。"dataName"の末尾に"/ (2024)"のような文言が付加されている場合は、当該処理が正常に稼働したかの確認が難しくなるので、この時点でその部分を削除しておいてください。
 
 ## invoice.schema.jsonの生成
 
-> invoice.schema.jsonは、RDEデータ登録画面での入力画面を生成するのに用いられます。すなわち、invoice.jsonは、invoice.schema.jsonから、(少なくとも骨組みについては)生成されることになります。invoice.schema.jsonの作成は、開発者が実行する"開発"業務に含まれますが、それについては別途記述します。ここでは、以下の内容でinvoce.schema.jsonを作成(コピー&ペースト)してください。
+`invoice.schema.json`は、RDEデータ登録画面での入力画面を生成するのに用いられます。
 
-`data/tasksupport/invoice.schema.json`を以下の内容で上書きします。
+invoice.schema.jsonの作成は、開発者が実行する"開発"業務に含まれますが、それについては別のマニュアルを参照して作成してください。
+
+ここでは、以下の内容でinvioce.schema.jsonを作成されているものとします。
+
+data/tasksupport/invoice.schema.json
 
 ```json
 {
@@ -198,13 +226,13 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
 
 > RDEToolKit v1.3.2より前のバージョンでは、`data/tasksupport/invoice.schema.json`のルートノード直下の"required"句に"sample"の指定が無く、かつ、`data/invoice/invoice.json`にsample句が記述されている場合でもエラーにはなりませんでしたが、RDEToolKit v1.3.2以降のバージョンではバリデーション機能の強化に伴いエラーとなります。試料情報を入力する場合は、適切にinvoice.schema.jsonを記述する必要があります。
 
-## metadata-def.jsonの変更
+## metadata-def.json 
 
 どういった項目を"メタデータ"とするかについてはmetadata-def.jsonファイルに定義しておく必要があります。
 
 > metadata.jsonに値を設定して書き出す処理は、構造化処理の中で実施する必要があります。
 
-`data/tasksupport/metadata-def.json`を以下の内容で上書きします。
+data/tasksupport/metadata-def.json
 
 ```json
 {
@@ -350,18 +378,6 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "mode": "Analysis value",
         "variable": 1
     },
-    "measurement date": {
-        "name": {
-            "ja": "送状測定日時",
-            "en": "measurement date from invoice"
-        },
-        "schema": {
-            "type": "string",
-            "format": "date-time"
-        },
-        "order": 13,
-        "mode": "Invoice"
-    },
     "invoice_number1": {
         "name": {
             "ja": "送状数値入力値1",
@@ -370,7 +386,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "schema": {
             "type": "number"
         },
-        "order": 14,
+        "order": 13,
         "mode": "Invoice"
     },
     "invoice_number2": {
@@ -381,7 +397,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "schema": {
             "type": "number"
         },
-        "order": 15,
+        "order": 14,
         "mode": "Invoice"
     },
     "invoice_string1": {
@@ -392,7 +408,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "schema": {
             "type": "string"
         },
-        "order": 16,
+        "order": 15,
         "mode": "Invoice"
     },
     "invoice_string2": {
@@ -403,7 +419,7 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "schema": {
             "type": "string"
         },
-        "order": 17,
+        "order": 16,
         "mode": "Invoice"
     },
     "invoice_list1": {
@@ -414,56 +430,98 @@ RDEToolKitのinit処理にて、invoice.jsonが作成されていますが、以
         "schema": {
             "type": "string"
         },
-        "order": 18,
+        "order": 17,
         "mode": "Invoice"
     }
 }
 ```
-> 実際のところ、上のファイルにはスペルミスが含まれています。本書中で修正しますので、ここでは上記内容のままコピー&ペーストにてファイルを上書き保存してください。
 
+> 実際のところ、上のファイルにはスペルミスが含まれています。本書中で修正しますので、ここでは上記内容のままチュートリアルを進めてください。
 
-## samples.zipの利用
+## invoice.json
 
-本書同時に配布されている`samples.zip`に、上で用意したファイルと同じものが用意されています。そちらを展開し、適切なフォルダにコピーすることでも上記と同様のことが可能です。
+"invoice.json"ファイルは、RDEデータ登録画面で入力した内容に基づいて自動的に生成されます。
 
-> samples.zipに含まれる内容は、上記の内容と同じものです。必要に応じて利用してください。
+ローカル開発においては、この時点で適切なinvoice.jsonを作成する手段がありませんので、本書では内容が入力されたinvoice.jsonを用います。
+
+data/invoice/invoice.json
+
+```
+{
+    "datasetId": "8fdec13d-bca2-4808-8753-2bb7e4e9c927",
+    "basic": {
+        "dateSubmitted": "2023-01-26",
+        "dataOwnerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734",
+        "dataName": "NIMS_TRIAL_20230126b",
+        "instrumentId": "413e53fb-aec9-41f8-ae55-3f88f6cd8d41",
+        "experimentId": null,
+        "description": ""
+    },
+    "custom": {
+        "measurement_date": "2023-01-25",
+        "invoice_string1": "送状文字入力値1",
+        "invoice_string2": null,
+        "is_devided": "devided",
+        "is_private_raw": "private"
+    },
+    "sample": {
+        "sampleId": "4d6de819-4b42-4dfe-9619-a0a0588653bc",
+        "names": [
+            "試料"
+        ],
+        "composition": null,
+        "referenceUrl": null,
+        "description": null,
+        "generalAttributes": [
+            {
+                "termId": "3adf9874-7bcb-e5f8-99cb-3d6fd9d7b55e",
+                "value": null
+            },
+            {
+                "termId": "0aadfff2-37de-411f-883a-38b62b2abbce",
+                "value": null
+            },
+            {
+                "termId": "0444cf53-db47-b208-7b5f-54429291a140",
+                "value": null
+            },
+            {
+                "termId": "e2d20d02-2e38-2cd3-b1b3-66fdb8a11057",
+                "value": null
+            }
+        ],
+        "specificAttributes": [
+            {
+                "classId": "52148afb-6759-23e8-c8b8-33912ec5bfcf",
+                "termId": "70c2c751-5404-19b7-4a5e-981e6cebbb15",
+                "value": null
+            },
+            {
+                "classId": "961c9637-9b83-0e9d-e60e-ffc1e2517afd",
+                "termId": "70c2c751-5404-19b7-4a5e-981e6cebbb15",
+                "value": null
+            },
+            {
+                "classId": "01cb3c01-37a4-5a43-d8ca-f523ca99a75b",
+                "termId": "dc27a956-263e-f920-e574-5beec912a247",
+                "value": null
+            }
+        ],
+        "ownerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734"
+    }
+}
+```
+
+> "invoice_string2"に指定しているnullは、データ登録時に入力が無かったことを意味します。RDEToolKitの古いバージョンでは、スキーマチェックで"異常"として検知されてしまうことがありました。その場合は、RDEToolKitのバージョンを新しいものに入れ替えてテストしてください。
 >
-> 同時配布がない場合は、本書の取得元等、関係者におたずねください。
+> 本書の後半で、タイトル("basic"中の"dataName")に変更を加える処理を実施します。"dataName"の末尾に"/ (2024)"のような文言が付加されている場合は、当該処理が正常に稼働したかの確認が難しくなるので、この時点でその部分を削除しておいてください。
 
-unzipコマンドがない場合はインストールします。
+## テンプレート(JSONファイル)やinvoice.jsonファイル生成に関する補足
 
-```bash
-sudo apt update
-sudo apt install unzip
-```
+上で"適切なinvoice.jsonを作成する手段がない"としていますが、実際には、NIMSから別途提供される"ツール"を使えば作成可能です。
 
-以下ホームディレクトリに`samples.zip`が存在しているものとして、例を示します。
+NIMSでは、「適切に値を設定した指定書式のExcelファイル用いて、テンプレートファイルやinvoice.jsonを生成する」ツールを別途提供しています。以下のURLを参照ください。
 
-```bash
-cd $HOME
-unzip samples.zip
-```
+* https://github.com/nims-mdpf/RDE_datasettemplate-schemafile-make-tool
 
-これにより`samples/`フォルダ下にファイルが作成されます。
-
-```bash
-(tenv) $ unzip samples.zip
-Archive:  samples.zip
-   creating: samples/
-  inflating: samples/metadata-def.json
-  inflating: samples/invoice.schema.json
-  inflating: samples/sample.data
-  inflating: samples/invoice.json
-```
-
-所定の場所にコピーします。
-
-```bash
-cp samples/sample.data  tutorial/container/data/inputdata/
-cp samples/invoice.json  tutorial/container/data/invoice/
-cp samples/invoice.schema.json  tutorial/container/data/tasksupport/
-cp samples/metadata-def.json  tutorial/container/data/tasksupport/
-```
-
-> 同様に、Pythonコードなどが含まれた`handson_codes.zip`も同時配布されます。こちらはこれ以降で作成されるPythonスクリプトが含まれています。こちらも必要に応じて利用してください。
-
+> 利用方法についても同じ配布場所にて提供されています。詳しくはそちらを参照ください。
