@@ -2,7 +2,7 @@
 
 # 応用編
 
-ここからは、前半部分(以下初級編と呼びます)を踏まえ"応用編"として、構成を変更した構造化処理プログラムについて記述します。
+ここからは、本書の前半部分(以下初級編と呼びます)を踏まえ"応用編"として、構成を変更した構造化処理プログラムについて記述します。
 
 構成を変更する場合、以下の2つが考えられます。
 
@@ -268,8 +268,7 @@ class IMetaParser(Generic[T], ABC):
 
     @abstractmethod
     def save_meta(
-        self, save_path: Path, meta: Meta, *, const_meta_info: MetaType | None = None, repeated_meta_info: RepeatedMetaType | None = None,
-    ) -> Any:
+        self, save_path: Path, meta: Meta, *, const_meta_info: MetaType | None = None, repeated_meta_info: RepeatedMetaType | None = None) -> Any:
         raise NotImplementedError
 
 
@@ -334,12 +333,6 @@ def dataset(paths: RdeDatasetPaths) -> None:
 
 `from __future__ import annotations` は、型ヒントを扱いやすくするための設定です。この行を書くと、型ヒントに書いた名前をすぐには評価せず、後で解釈するようになります。そのため、まだ定義されていないクラス名や、自分自身のクラス名を型ヒントに書きやすくなります。
 
-> すべての差異を吸収出来るわけではなく、本書では主に`型ヒント`に関する記述の差異を吸収するために使用しています。
-
-実行するPythonバージョンが"3.10以降"のように確定出来る場合は、この記述はなくても構いません。不要の場合でも不具合はでませんので、本書では入れることを前提とします。
-
-> 本書で例示するスクリプトであってもこの記述が抜けている場合があります。実行時のエラーがPythonバージョン間の差異に起因する場合は、記述を追加して実行してみてください。
-
 <div class="page" />
 
 ## 実装
@@ -399,7 +392,7 @@ data
 │   └── invoice.json
 ├── invoice_patch (★)
 ├── logs (★)
-│   └── rdesys_20260522_165654.log (★)
+│   └── rdesys_20260930_165654.log (★)
 ├── main_image (★)
 ├── meta (★)
 │   └── metadata.json (★)
@@ -480,7 +473,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
-│   └── rdesys_20260522_171003.log
+│   └── rdesys_20260930_171003.log
 ├── main_image
 ├── meta
 │   └── metadata.json
@@ -507,6 +500,8 @@ data
 
 具体的には、"custom_module()"関数内の記述をすべて削除します。
 
+modules/datasets_process.py
+
 ```python
 def custom_module(paths: RdeDatasetPaths) -> None
     pass
@@ -531,7 +526,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
-│   └── rdesys_20260522_172056.log
+│   └── rdesys_20260930_172056.log
 ├── main_image
 ├── meta
 ├── nonshared_raw
@@ -815,17 +810,17 @@ main.pyを実行します。
 │   │   └── invoice.json.orig
 :
 (tenv) $ diff -ru data/nonshared_raw/invoice.json.orig data/invoice/invoice.json
---- data/nonshared_raw/invoice.json.orig        2026-05-25 11:27:14.374217322 +0900
-+++ data/invoice/invoice.json   2026-05-25 11:27:14.374217322 +0900
+--- data/nonshared_raw/invoice.json.orig        2026-09-30 17:51:48.832566026 +0900
++++ data/invoice/invoice.json   2026-09-30 17:51:48.832566026 +0900
 @@ -3,7 +3,7 @@
      "basic": {
          "dateSubmitted": "2023-01-26",
-         "dataOwnerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734",
+         "dataOwnerId": "6932eaf2ba96dc12812d07f3f3bbdca9de5e149c3837376539343134",
 -        "dataName": "NIMS_TRIAL_20230126b",
 +        "dataName": "NIMS_TRIAL_20230126b / (2024)",
          "instrumentId": "413e53fb-aec9-41f8-ae55-3f88f6cd8d41",
          "experimentId": null,
-         "description":
+         "description": ""
 ```
 
 次の処理に備え、上で出力したファイルを削除するなど、実行前の状態に戻しておきます。

@@ -68,7 +68,6 @@ def custom_module(paths: RdeDatasetPaths) -> None:
 >
 > `Exception Type: NameError`が表示される場合は、`from rdetoolkit.invoicefile import InvoiceFile`の追加を忘れている場合が考えられます。確認し、抜けている場合は追加してください。
 
-
 上記例では'(2024)'がタイトルに含まれていない場合にのみ追記しています。これは、べき等性、つまり何度同じ処理をしても同じ結果となることを想定しています。より厳密には、**末尾**に当該文字列があるかどうか、といった別のチェックが必要となる場合があることに注意してください。
 
 また、今回の`invoice.json`では、以下の様にprivateつまり"非公開"を指定しています。
@@ -98,12 +97,12 @@ data/nonshared_raw/
 
 ```bash
 (tenv) $ diff -ru data/nonshared_raw/invoice.json.orig data/invoice/invoice.json
---- data/nonshared_raw/invoice.json.orig        2026-05-22 14:15:31.839196134 +0900
-+++ data/invoice/invoice.json   2026-05-22 14:15:31.854196486 +0900
+--- data/nonshared_raw/invoice.json.orig        2026-09-25 15:24:56.773627456 +0900
++++ data/invoice/invoice.json   2026-09-25 15:24:56.773627456 +0900
 @@ -3,7 +3,7 @@
      "basic": {
          "dateSubmitted": "2023-01-26",
-         "dataOwnerId": "119cae3d3612df5f6cf7085fb8deaa2d1b85ce963536323462353734",
+         "dataOwnerId": "6932eaf2ba96dc12812d07f3f3bbdca9de5e149c3837376539343134",
 -        "dataName": "NIMS_TRIAL_20230126b",
 +        "dataName": "NIMS_TRIAL_20230126b / (2024)",
          "instrumentId": "413e53fb-aec9-41f8-ae55-3f88f6cd8d41",
@@ -113,7 +112,7 @@ data/nonshared_raw/
 
 > 想定通りにdataNameの値が変更されていることが分かります。
 >
-> もとのinvoice.jsonファイルの作り方により、最後に`ファイル末尾に改行がありません`と表示される場合があります。ファイル末尾の改行の有無は処理に影響しませんので、出力されなくても問題ありません。
+> もとのinvoice.jsonファイルの作り方により、最後に`ファイル末尾に改行がありません`と表示される場合があります。ファイル末尾の改行の有無は処理に影響しませんので、出力されてもされなくても問題ありません。
 
 なお、上記実装は、readf_jsonとwritef_jsonを使って以下の様に記述することもできます。
 

@@ -2,7 +2,9 @@
 
 # メタデータの出力
 
-構造化処理プログラムの大きな目的の一つは"メタデータの抽出"です。基本的に、どういった構造化処理プログラムでも必ずメタデータの抽出は行われることが想定されます(溜めるだけを想定したデータセットではメタデータファイルの作成が行われない場合もあります)。
+構造化処理プログラムの大きな目的の一つは"メタデータの抽出"です。
+
+どういった構造化処理プログラムであっても、基本的にはメタデータの抽出は行われることが想定されます(溜めるだけを想定したデータセットではメタデータファイルの作成が行われない場合もあります)。
 
 > 図の作成や数値データの可読化(→ CSVファイルへの出力) などはオプション実装、つまり要件次第で実装する場合もあれば実装しない場合もあります。
 
@@ -11,7 +13,7 @@ RDEでは抽出したメタデータを、"metadata.json" というJSON形式の
 抽出されたメタデータがどのような項目を持ちうるかは、データセットを開設前に事前に準備する "metadata-def.json"という JSON ファイルを用意して記述しておく必要があります。
 本書では、すでに述べたようにmetadata-def.jsonがすでに用意された状態を想定しますが、通常は開発者が記述/作成する必要があります。
 
-多くの場合、「入力ファイルを読み込み取得したメタデータを、ファイル(metadata.json)として出力する」ことが想定されます。本書では、それ以外にもいくつかの方法でメタデータを収集する手段について実装例を示すことにします。
+多くの場合、「入力ファイルを読み込み取得したメタデータを、ファイル(metadata.json)として出力する」ことが想定されます。本書では、それ以外にもいくつかの方法でメタデータを収集する手段について実装例を示します。
 
 ## 想定
 
@@ -95,8 +97,9 @@ def custom_module(paths: RdeDatasetPaths) -> None:
         "series_data_stdev": s_stdev,
     }
 
-    # Merge 2 types of metadata
+    # Set const_meta_info (Merge 2 types of metadata)
     const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"]
+    # Set repeated_meta_info
     repeated_meta_info = meta_vars
 
     # Set metadata to meta instance
@@ -110,22 +113,55 @@ def custom_module(paths: RdeDatasetPaths) -> None:
 
 ```
 
-> 上の処理では、入力ファイルから取得したメタデータと送状から取得したメタデータをマージしています。つまり同じ項目名があった場合は送状側の値が出力されます。上書きでは不都合がある場合は、どちらかのキー名(項目名)を変更するなどして対応する必要があります。
->
-> 以下に、送状の項目名は変更せず、メタデータを出力する前に別のキー名として出力する場合の例を示します。
+上の処理では、入力ファイルから取得したメタデータと送状から取得したメタデータをマージしています。つまり同じ項目名があった場合はあとから指定した側、つまり上記例では送状側の値が出力されます。
+
+逆に、入力ファイルから取得した側のデータを出力したい場合は、マージの順番を入れ替えます。
+
+```python
+    const_meta_info = invoice.invoice_obj["custom"] | raw_meta_obj
+```
+
+上書きでは不都合がある場合は、どちらかのキー名(項目名)を変更するなどして対応する必要があります。
+
+以下に、送状の項目名は変更せず、メタデータを出力する前に別のキー名として出力する場合の例を示します。
 
 ```python
 :
-    # Merge 2 types of metadata
-    measurement_date_invoice = invoice.invoice_obj["custom"]['measurement_date']
-    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"] | { 'measurement_date_invoice' : measurement_date_invoice }
-    repeated_meta_info = meta_vars
+    # Set const_meta_info (Merge 3 types of metadata)
+    measurement_date_from_data = raw_meta_obj['measurement_date']
+    const_meta_info = raw_meta_obj | invoice.invoice_obj["custom"] | { 'measurement_date_from_data' : measurement_date_from_data }
 :
 ```
 
+項目名`measurement_date`のデータは、raw_meta_objにもinvoice.invoice_obj["custom"]にも存在します(下記★が表示されている行参照)。
+
+raw_meta_obj
+
+```
+{'data_title': 'data_title 2',
+ 'measurement_date': '2023/1/25 23:08', ★
+ 'series_number': '3',
+ 'x_label': 'x(unit)',
+ 'y_label': 'y(unit)'}
+```
+
+invoice.invoice_obj["custom"]
+
+```
+{'invoice_string1': '送状文字入力値1',
+ 'invoice_string2': None,
+ 'is_devided': 'devided',
+ 'is_private_raw': 'private',
+ 'measurement_date': '2023-01-25'} ★
+```
+
+このままでは、後者の'measurement_date'がmetadata.jsonに出力されることになります。そのため、上の例では、前者の'measurement_date'を別の変数に格納し、それを'measurement_date_from_data'という項目名で出力することで上書きでデータが消えてしまうことを防止しています。
+
+> ただし、metadata-def.jsonに'measurement_date_from_data'の定義を加えないと、metadata.jsonには出力されないことになります。
+
 ## (参考) metadata.json
 
-参考のため、上記(サンプル)コードでの出力結果を以下に示します。
+参考のため、上記(サンプル)コード(送り状側のデータを出力するパターン)での出力結果を以下に示します。
 
 ```bash
 (tenv) $ cat data/meta/metadata.json

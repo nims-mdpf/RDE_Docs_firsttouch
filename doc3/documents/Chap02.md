@@ -9,7 +9,7 @@
 | 開発マシン | 実機、仮想マシンいずれも可 | | 
 | 開発OS | Linux | ディストリビューションは問わない |
 | 開発言語 | Python v3.10以上 | 仮想環境(venv)が利用できること |
-| RDEToolKit | v1.6.4 | 開発時点の最新版の利用を推奨 |
+| RDEToolKit | v1.7.1 | 開発時点の最新版の利用を推奨 |
 | Docker | Docker Engine、 Docker CLI | Docker利用時のみ |
 | 開発補助ツール | テンプレート生成ツール、構造化処理結果プレビューツール | NIMS提供のツール。 テンプレート生成ツールの利用にはMS Excelが必要 |
 
@@ -29,7 +29,7 @@ RDEでは、内部でDocker機能を使用しています。開発者は、Docke
 | ---- | ---- | ---- |
 | 開発OS | Ubuntu 24.04 | |
 | 開発言語 | Python v3.12 | 仮想環境(venv)を含む |
-| パッケージ | RDEToolKit v1.6.4 | RDEToolKitの依存パッケージを含む |
+| パッケージ | RDEToolKit v1.7.1 | RDEToolKitの依存パッケージを含む |
 
 ## Linux環境
 
@@ -37,7 +37,7 @@ RDEでは、内部でDocker機能を使用しています。開発者は、Docke
 
 Pythonが稼働すればよいので、ディストリビューションに特に制限はありません。
 
-> Pythonを実行するディストリビューションとして、現時点(2026年06月)では`Ubuntu 24.04`の利用を推奨します。以降本書では、Ubuntu 24.04を使った場合の実行例を示します。また、バージョン番号を明記しない`Ubuntu`は、`Ubuntu 24.04`を指すものとします。
+> Pythonを実行するディストリビューションとして、現時点(2026年10月)では`Ubuntu 24.04`の利用を推奨します。以降本書では、Ubuntu 24.04を使った場合の実行例を示します。また、バージョン番号を明記しない`Ubuntu`は、`Ubuntu 24.04`を指すものとします。
 
 また、実マシン上に構築されたOSでもいいですし、VirtualBoxなどを利用したVM(Virtual Machine)でも問題ありません。Windowsを利用している場合は、WSL2の利用を推奨します。
 
@@ -168,52 +168,51 @@ pip install rdetoolkit
 ```bash
 Package                   Version
 ------------------------- -----------
-annotated-doc             0.0.4
-annotated-types           0.7.0
+annotated-doc             0.0.5
+annotated-types           0.8.0
 attrs                     26.1.0
-build                     1.5.0
-chardet                   7.4.3
-charset-normalizer        3.4.7
-click                     8.4.0
+build                     1.6.0
+chardet                   7.6.0
+charset-normalizer        3.5.1
 contourpy                 1.3.3
 cycler                    0.12.1
 et_xmlfile                2.0.0
-eval_type_backport        0.3.1
-fonttools                 4.63.0
+eval_type_backport        0.4.0
+fonttools                 4.64.0
 jsonschema                4.26.0
 jsonschema-specifications 2025.9.1
-kiwisolver                1.5.0
-Markdown                  3.10.2
+kiwisolver                1.5.1
+Markdown                  3.10.3
 markdown-it-py            4.2.0
-matplotlib                3.10.9
+matplotlib                3.11.1
 mdurl                     0.1.2
-numpy                     2.4.5
+numpy                     2.5.3
 openpyxl                  3.1.5
-packaging                 26.2
-pandas                    3.0.3
-pillow                    12.2.0
-pip                       26.1.1
-polars                    1.40.1
-polars-runtime-32         1.40.1
-pyarrow                   24.0.0
-pydantic                  2.13.4
-pydantic_core             2.46.4
-Pygments                  2.20.0
+packaging                 26.3
+pandas                    3.0.5
+pillow                    12.3.0
+pip                       26.2.1
+polars                    1.44.1
+polars-runtime-32         1.44.1
+pyarrow                   25.0.1
+pydantic                  2.13.5
+pydantic_core             2.46.5
+Pygments                  2.21.0
 pyparsing                 3.3.2
 pyproject_hooks           1.2.0
 python-dateutil           2.9.0.post0
 PyYAML                    6.0.3
-rdetoolkit                1.6.4
+rdetoolkit                1.7.1
 referencing               0.37.0
 rich                      15.0.0
-rpds-py                   0.30.0
+rpds-py                   2026.6.3
 shellingham               1.5.4
 six                       1.17.0
 toml                      0.10.2
-tomlkit                   0.15.0
-typer                     0.25.1
-typing_extensions         4.15.0
-typing-inspection         0.4.2
+tomlkit                   0.15.1
+typer                     0.27.2
+typing_extensions         4.16.0
+typing-inspection         0.4.4
 ```
 
 > 他のバージョンのRDEToolKitの場合は、依存パッケージのバージョンも変わっている可能性があります。RDEToolKitでは、バージョン毎に必要なpipモジュールのバージョンも固定していますので注意してください。また、インストール時期により依存パッケージバージョンが変わるものもありますので、同じバージョンのRDEToolKitを利用していた場合でも、必ずしも上記と同じバージョンになるとは限りません。
@@ -407,7 +406,7 @@ Done!
 (tenv) $ ls
 Dockerfile  data  main.py  modules  requirements.txt
 (tenv) $ python -m rdetoolkit version
-1.6.4
+1.7.1
 ```
 
 * 上は本書執筆時点でのバージョンとなります。随時アップデートされます。

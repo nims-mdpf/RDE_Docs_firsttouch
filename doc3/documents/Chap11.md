@@ -77,7 +77,13 @@ ModuleNotFoundError: No module named 'matplotlib'
 ```
 (tenv) $ pip list | grep matplotlib
 (tenv) $ 
+```
 
+> 上記のように何も表示されない場合は、インストールが必要となります。
+
+インストールします。
+
+```
 (tenv) $ pip install matplotlib
 ```
 
