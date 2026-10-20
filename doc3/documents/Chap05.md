@@ -63,6 +63,36 @@ RDEのジョブ実行結果はWebブラウザで確認することができま�
 1
 ```
 
+### StructuredError以外のエラー対応
+
+ZeroDivisionErrorやFileNotFoundErrorといった、開発者が意図しないエラーが発生する場合があります。
+
+> 本来はそういったエラーの発生が起きないように構造化処理プログラムが作成されることが望ましいです。
+
+RDEToolKitでは、それらStructuredError以外のエラーを捕捉し処理することができます。捕捉したい処理を含む関数に`@catch_exception_with_message()`デコレーターを指定します
+
+以下に捕捉する例を示します。
+
+
+```python
+:
+from rdetoolkit.errors import catch_exception_with_message
+：
+@catch_exception_with_message(error_message="ERROR: failed in data processing", error_code=50)
+def custom_module(paths: RdeDatasetPaths) -> None:
+    with open("not_fouund.txt", "r", encoding="utf-8") as f:
+        print(f.read())
+:
+```
+
+これによりStructuredError以外のエラーが発生した場合に、`job.failed`に設定したメッセージとエラーコードがセットされます。
+
+```bash
+(tenv) $ cat data/job.failed 
+ErrorCode=50
+ErrorMessage=Error: ERROR: failed in data processing
+```
+
 ## フォルダ初期化
 
 前述の様に、ジョブ実行時にエラーが発生した場合は"data/job.failed"ファイルが自動で生成されます。

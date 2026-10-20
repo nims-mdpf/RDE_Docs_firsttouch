@@ -198,22 +198,22 @@ def dataset(paths: RdeDatasetPaths) -> None:
 
 ```bash
 (tenv) $ python main.py
-2026-05-25 15:50:12 +0900 (INFO) Foo             --> Start
-2026-05-25 15:50:12 +0900 (INFO) Foo             <-- End
-2026-05-25 15:50:12 +0900 (INFO) Bar             --> Start
-2026-05-25 15:50:12 +0900 (DEBUG) Sample log!
-2026-05-25 15:50:12 +0900 (INFO) Bar             <-- End
+2026-10-01 15:50:12 +0900 (INFO) Foo             --> Start
+2026-10-01 15:50:12 +0900 (INFO) Foo             <-- End
+2026-10-01 15:50:12 +0900 (INFO) Bar             --> Start
+2026-10-01 15:50:12 +0900 (DEBUG) Sample log!
+2026-10-01 15:50:12 +0900 (INFO) Bar             <-- End
 ```
 
 同時にログファイル(data/logs/rdeuser.log)にも同じ内容がセットされます。
 
 ```bash
 (tenv) $ cat data/logs/rdeuser.log
-2026-05-25 15:50:12 +0900 (INFO) Foo             --> Start
-2026-05-25 15:50:12 +0900 (INFO) Foo             <-- End
-2026-05-25 15:50:12 +0900 (INFO) Bar             --> Start
-2026-05-25 15:50:12 +0900 (DEBUG) Sample log!
-2026-05-25 15:50:12 +0900 (INFO) Bar             <-- End
+2026-10-01 15:50:12 +0900 (INFO) Foo             --> Start
+2026-10-01 15:50:12 +0900 (INFO) Foo             <-- End
+2026-10-01 15:50:12 +0900 (INFO) Bar             --> Start
+2026-10-01 15:50:12 +0900 (DEBUG) Sample log!
+2026-10-01 15:50:12 +0900 (INFO) Bar             <-- End
 ```
 
 開発が終了し、ログ出力が不要となった場合は、datasets_process.pyの上の方でセットした`get_logger()`の引数として`False`を与えればログ表示、および書き込みがなくなります。
@@ -265,7 +265,7 @@ $ ./reinit.sh
 
 (tenv) $ tree data/logs
 data/logs
-└── rdesys_20260525_160330.log
+└── rdesys_20261001_160330.log
 
 1 directory, 1 file
 ```
@@ -549,7 +549,6 @@ class CustomProcess(StructuredProcessBase):
 
         metaobj.writefile(save_path)
 
-
     @log_decorator()
     def make_struct(self) -> None:
         # Write CSV file(s)
@@ -627,26 +626,26 @@ class CustomProcess(StructuredProcessBase):
 (tenv) $ ./reinit.sh
 :
 (tenv) $ python main.py 
-2026-05-25 16:40:01 +0900 (INFO) __init__        --> Start
-2026-05-25 16:40:01 +0900 (INFO) __init__        <-- End
-2026-05-25 16:40:01 +0900 (INFO) check_input     --> Start
-2026-05-25 16:40:01 +0900 (INFO) check_input     <-- End
-2026-05-25 16:40:01 +0900 (INFO) parse_invoice   --> Start
-2026-05-25 16:40:01 +0900 (INFO) parse_invoice   <-- End
-2026-05-25 16:40:01 +0900 (INFO) update_invoice  --> Start
-2026-05-25 16:40:01 +0900 (INFO) update_invoice  <-- End
-2026-05-25 16:40:01 +0900 (INFO) parse_input     --> Start
-2026-05-25 16:40:01 +0900 (INFO) parse_input     <-- End
-2026-05-25 16:40:01 +0900 (INFO) make_meta       --> Start
-2026-05-25 16:40:01 +0900 (INFO) make_meta       <-- End
-2026-05-25 16:40:01 +0900 (INFO) make_struct     --> Start
-2026-05-25 16:40:01 +0900 (INFO) make_struct     <-- End
-2026-05-25 16:40:01 +0900 (INFO) make_graph      --> Start
-2026-05-25 16:40:03 +0900 (INFO) make_graph      <-- End
-2026-05-25 16:40:03 +0900 (INFO) make_thumbnail  --> Start
-2026-05-25 16:40:03 +0900 (INFO) make_thumbnail  <-- End
-2026-05-25 16:40:03 +0900 (INFO) copy_raw_files  --> Start
-2026-05-25 16:40:03 +0900 (INFO) copy_raw_files  <-- End
+2026-10-10 16:40:01 +0900 (INFO) __init__        --> Start
+2026-10-10 16:40:01 +0900 (INFO) __init__        <-- End
+2026-10-10 16:40:01 +0900 (INFO) check_input     --> Start
+2026-10-10 16:40:01 +0900 (INFO) check_input     <-- End
+2026-10-10 16:40:01 +0900 (INFO) parse_invoice   --> Start
+2026-10-10 16:40:01 +0900 (INFO) parse_invoice   <-- End
+2026-10-10 16:40:01 +0900 (INFO) update_invoice  --> Start
+2026-10-10 16:40:01 +0900 (INFO) update_invoice  <-- End
+2026-10-10 16:40:01 +0900 (INFO) parse_input     --> Start
+2026-10-10 16:40:01 +0900 (INFO) parse_input     <-- End
+2026-10-10 16:40:01 +0900 (INFO) make_meta       --> Start
+2026-10-10 16:40:01 +0900 (INFO) make_meta       <-- End
+2026-10-10 16:40:01 +0900 (INFO) make_struct     --> Start
+2026-10-10 16:40:01 +0900 (INFO) make_struct     <-- End
+2026-10-10 16:40:01 +0900 (INFO) make_graph      --> Start
+2026-10-10 16:40:03 +0900 (INFO) make_graph      <-- End
+2026-10-10 16:40:03 +0900 (INFO) make_thumbnail  --> Start
+2026-10-10 16:40:03 +0900 (INFO) make_thumbnail  <-- End
+2026-10-10 16:40:03 +0900 (INFO) copy_raw_files  --> Start
+2026-10-10 16:40:03 +0900 (INFO) copy_raw_files  <-- End
 ```
 
 どういったファイルが生成されているかの確認をします。
@@ -661,7 +660,7 @@ data
 │   └── invoice.json
 ├── invoice_patch
 ├── logs
-│   ├── rdesys_20260525_164634.log
+│   ├── rdesys_20261001_164634.log
 │   └── rdeuser.log
 ├── main_image
 │   └── all_series.png
