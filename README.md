@@ -64,6 +64,8 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
     - 順次追加していきますので[NIMS-MDPF github](https://github.com/nims-mdpf/)をご確認ください
 6. Dockerコンテナを使って開発をしたいという方はこちら
     - [doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf](doc5/RDEToolKitを用いたRDE構造化処理用Dockerコンテナ作成手順書.pdf)
+6. RDEToolKitの各登録モードの利用事例 RDEToolKitのデータ登録モードの説明資料です
+    - [doc6/documents](doc6/documents)
 7. RDEToolKitのデータ登録モードについてもっと知りたい方はこちら
     - [RDE_rdetoolkit_5mode_templates](https://github.com/nims-mdpf/RDE_rdetoolkit_5mode_templates)
        - RDEToolKitのデータ登録モード5種類について動かしながら学べるようになっています
@@ -92,4 +94,4 @@ RDE (Research Data Express) は、物質・材料についての研究データ�
 お問い合わせ フォーム<br>
 https://dice.nims.go.jp/contact/form.html
 
-2025.12.05 更新
+2026.10.29 更新
